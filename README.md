@@ -1,6 +1,6 @@
-# Phaser 3 Webpack Project Template
+# MMORPG PoC
 
-A Phaser 3 Project Template
+MMORPG PoC
 
 ### Requirements
 

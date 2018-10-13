@@ -1,28 +1,34 @@
+import EasyStar from 'easystarjs';
+
 class GameScene extends Phaser.Scene {
     constructor(test) {
         super({
             key: 'GameScene'
         });
+        this.gameOver = false;
+        this.isMoving = false;
     }
     faceNextTile(tween) {
-        var isVerticalMovement = Math.abs(player.y - monster.y) < 100 || Math.abs(monster.y - player.y) < 100;
+        console.log(this);
+        var isVerticalMovement = Math.abs(this.player.y - this.monster.y) < 100 || Math.abs(this.monster.y - this.player.y) < 100;
         if (isVerticalMovement) {
-            if (player.x > monster.x) {
-                monster.anims.play('monsterRight', false);
+            if (this.player.x > this.monster.x) {
+                this.monster.anims.play('monsterRight', false);
             } else {
-                monster.anims.play('monsterLeft', true);
+                this.monster.anims.play('monsterLeft', true);
             }
         } else {
-            if (player.y > monster.y) {
-                monster.anims.play('monsterDown', true);
+            if (this.player.y > this.monster.y) {
+                this.monster.anims.play('monsterDown', true);
             } else {
-                monster.anims.play('monsterUp', true);
+                this.monster.anims.play('monsterUp', true);
             }
         }
     }
-    calculAIAndMove(that) {
+    calculAIAndMove() {
+        const that = this;
         // Monster go to player
-        that.finder.findPath(Math.floor(monster.x / 32), Math.floor(monster.y / 32), Math.floor(player.x / 32), Math.floor(player.y / 32), function (path) {
+        this.finder.findPath(Math.floor(this.monster.x / 32), Math.floor(this.monster.y / 32), Math.floor(this.player.x / 32), Math.floor(this.player.y / 32), function (path) {
             if (path === null) {
                 //console.warn("Path was not found.");
             } else {
@@ -34,10 +40,10 @@ class GameScene extends Phaser.Scene {
                     var ex = path[i + 1].x;
                     var ey = path[i + 1].y;
                     tweens.push({
-                        targets: monster,
+                        targets: that.monster,
                         x: { value: ex * 32, duration: 200 },
                         y: { value: ey * 32, duration: 200 },
-                        onStart: faceNextTile
+                        onStart: that.faceNextTile.bind(that)
                     });
                 }
                 that.tweens.killAll();
@@ -46,7 +52,7 @@ class GameScene extends Phaser.Scene {
                 });
             }
         });
-        that.finder.calculate();
+        this.finder.calculate();
     }
     collectStar(player, star) {
         star.disableBody(true, true);
@@ -73,15 +79,15 @@ class GameScene extends Phaser.Scene {
 
         }
     }
-    monsterCatch(player, bomb) {
+    monsterCatch() {
         this.physics.pause();
 
-        player.setTint(0xff0000);
+        this.player.setTint(0xff0000);
 
-        player.anims.play('playerImmobile');
-        monster.anims.play('monsterImmobile');
+        this.player.anims.play('playerImmobile');
+        this.monster.anims.play('monsterImmobile');
 
-        gameOver = true;
+        this.gameOver = true;
 
         this.add.text(30, 30, 'Gamer over', { fontSize: '32px', fontWeight: 'bold', fill: '#FF0000' });
     }
@@ -138,19 +144,19 @@ class GameScene extends Phaser.Scene {
         //platforms.create(800, 250, 'ground');
 
         // The player and its settings
-        const player = this.physics.add.sprite(100, 450, 'all');
+        this.player = this.physics.add.sprite(100, 450, 'all');
 
         // The player and its settings
-        const monster = this.physics.add.sprite(300, 400, 'monster');
+        this.monster = this.physics.add.sprite(300, 400, 'monster');
 
         //  Player physics properties. Give the little guy a slight bounce.
         //player.setBounce(0.5);
-        player.setCollideWorldBounds(true);
+        this.player.setCollideWorldBounds(true);
 
-        monster.setCollideWorldBounds(true);
+        this.monster.setCollideWorldBounds(true);
 
-        this.physics.add.collider(player, layer);
-        this.physics.add.collider(monster, layer);
+        this.physics.add.collider(this.player, layer);
+        this.physics.add.collider(this.monster, layer);
 
         // this.physics.world.setBounds(0, 0, 1500, 1500);
         // this.cameras.main.setBounds(0, 0, 1500, 1500);
@@ -159,7 +165,7 @@ class GameScene extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
-        this.cameras.main.startFollow(player);
+        this.cameras.main.startFollow(this.player);
 
         this.cameras.main.followOffset.set(0, 0);
 
@@ -172,7 +178,7 @@ class GameScene extends Phaser.Scene {
             for (var x = 0; x < map.width; x++) {
                 // In each cell we store the ID of the tile, which corresponds
                 // to its index in the tileset of the map ("ID" field in Tiled)
-                col.push(getTileID(map, x, y));
+                col.push(this.getTileID(map, x, y));
             }
             grid.push(col);
         }
@@ -264,7 +270,7 @@ class GameScene extends Phaser.Scene {
         });
 
         //  Input Events
-        cursors = this.input.keyboard.createCursorKeys();
+        this.cursors = this.input.keyboard.createCursorKeys();
 
         //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
         // stars = this.physics.add.group({
@@ -280,10 +286,10 @@ class GameScene extends Phaser.Scene {
 
         // });
 
-        bombs = this.physics.add.group();
+        const bombs = this.physics.add.group();
 
         //  The score
-        scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+        const scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
 
         //  Collide the player and the monster
         //this.physics.add.collider(player, monster);
@@ -293,49 +299,49 @@ class GameScene extends Phaser.Scene {
         //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
         //this.physics.add.overlap(player, stars, collectStar, null, this);
 
-        this.physics.add.collider(player, monster, monsterCatch, null, this);
+        this.physics.add.collider(this.player, this.monster, this.monsterCatch, null, this);
 
-        recalculAIEvent = this.time.addEvent({ delay: 1000, callback: calculAIAndMove.bind(this, this), callbackScope: this, loop: true });
+        const recalculAIEvent = this.time.addEvent({ delay: 1000, callback: this.calculAIAndMove, callbackScope: this, loop: true });
     }
     update() {
         var that = this;
         //this.tweens.killAll();
 
 
-        player.setVelocity(0);
+        this.player.setVelocity(0);
 
-        if (gameOver) {
+        if (this.gameOver) {
             return;
         }
 
-        if (cursors.up.isDown) {
-            player.setVelocityY(-160);
+        if (this.cursors.up.isDown) {
+            this.player.setVelocityY(-160);
 
-            player.anims.play('playerUp', true);
-            isMoving = true;
+            this.player.anims.play('playerUp', true);
+            this.isMoving = true;
         }
-        else if (cursors.down.isDown) {
-            player.setVelocityY(160);
+        else if (this.cursors.down.isDown) {
+            this.player.setVelocityY(160);
 
-            player.anims.play('playerDown', true);
-            isMoving = true;
+            this.player.anims.play('playerDown', true);
+            this.isMoving = true;
         }
-        else if (cursors.left.isDown) {
-            player.setVelocityX(-160);
+        else if (this.cursors.left.isDown) {
+            this.player.setVelocityX(-160);
 
-            player.anims.play('playerLeft', true);
-            isMoving = true;
+            this.player.anims.play('playerLeft', true);
+            this.isMoving = true;
         }
-        else if (cursors.right.isDown) {
-            player.setVelocityX(160);
+        else if (this.cursors.right.isDown) {
+            this.player.setVelocityX(160);
 
-            player.anims.play('playerRight', true);
-            isMoving = true;
+            this.player.anims.play('playerRight', true);
+            this.isMoving = true;
         }
 
-        if (!cursors.left.isDown && !cursors.right.isDown && !cursors.up.isDown && !cursors.down.isDown) {
-            player.anims.play('playerImmobile', true);
-            isMoving = false;
+        if (!this.cursors.left.isDown && !this.cursors.right.isDown && !this.cursors.up.isDown && !this.cursors.down.isDown) {
+            this.player.anims.play('playerImmobile', true);
+            this.isMoving = false;
         }
 
 
