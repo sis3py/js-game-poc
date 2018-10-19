@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import Phaser from 'phaser'
-import GameScene from '../../client/scenes/GameScene';
+import GameScene from './scenes/gameScene';
 
-class App extends Component {
+class Game extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -40,4 +40,4 @@ class App extends Component {
     }
 }
 
-export default App;
+export default Game;
