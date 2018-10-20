@@ -7,7 +7,9 @@ const port = 4001;
 
 const app = express();
 
-app.use(express.static("dist"));
+const players = {};
+
+app.use(express.static('dist'));
 
 // our server instance
 const server = http.createServer(app);
@@ -16,9 +18,9 @@ const server = http.createServer(app);
 const io = socketIO(server);
 
 // This is what the socket.io syntax is like, we will work this later
-io.on('connection', socket => {
+io.on('connection', (socket) => {
   console.log('New client connected');
-  
+
   // // just like on the client side, we have a socket.on method that takes a callback function
   // socket.on('change color', (color) => {
   //   // once we get a 'change color' event from one of our clients, we will send it to the rest of the clients
@@ -27,18 +29,18 @@ io.on('connection', socket => {
   //   io.sockets.emit('change color', color);
   // })
 
-  socket.on('createGame', function(room) {
+  socket.on('createGame', (room) => {
     console.log(`room ${room} joined`);
     socket.join(room);
   });
-  
+
   // disconnect is fired when a client leaves the server
   socket.on('disconnect', () => {
     console.log('user disconnected');
-  })
-})
+  });
+});
 
-app.get('/', function(request, response) {
+app.get('/', (request, response) => {
   response.sendFile('dist/index.html');
 });
 
