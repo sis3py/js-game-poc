@@ -1,12 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { createGame } from '../logic/createGameLogic';
+import { Link, Redirect } from 'react-router-dom';
 
 class CreateGamePage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       gameName: '',
+      isGameCreated: false,
     };
     this.createGame = this.createGame.bind(this);
     this.updateGameName = this.updateGameName.bind(this);
@@ -17,11 +17,17 @@ class CreateGamePage extends React.Component {
   }
 
   createGame() {
-    const { socket, gameName } = this.state;
-    createGame(socket, gameName);
+    const { networkManager } = this.props;
+    const { gameName } = this.state;
+    networkManager.createGame(gameName);
+    this.setState({ isGameCreated: true });
   }
 
   render() {
+    const { isGameCreated } = this.state;
+    if (isGameCreated) {
+      return <Redirect to="/lobby" />;
+    }
     const { gameName } = this.state;
     const { nickname } = this.props;
     return (

@@ -30,13 +30,25 @@ io.on('connection', (socket) => {
   // })
 
   socket.on('createGame', (room) => {
+    players[socket.id] = { ...players[socket.id], game: room };
     console.log(`room ${room} joined`);
     socket.join(room);
   });
 
-  // disconnect is fired when a client leaves the server
+  socket.on('sendPlayerData', (playerData) => {
+    console.log(`Player data ${playerData} sent`);
+    players[socket.id] = { ...players[socket.id], ...playerData };
+    console.log(players);
+  });
+
+  socket.on('sendChatMessage', (message) => {
+    console.log(`Chat message ${message} sent`);
+    socket.to(players[socket.id].game).emit('sendChatMessageToGame', message);
+  });
+
   socket.on('disconnect', () => {
     console.log('user disconnected');
+    delete players[socket.id];
   });
 });
 

@@ -1,59 +1,54 @@
 import React, { Component } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import io from 'socket.io-client';
 import CreateGamePage from '../../createGame/component/createGamePage';
 import JoinGamePage from '../../joinGame/component/joinGamePage';
 import OptionsPage from '../../options/component/optionsPage';
 import TitlePage from '../../title/component/titlePage';
-import { serverAdress } from '../../../../configuration/configuration';
+import LobbyPage from '../../lobby/component/lobbyPage';
+import GamePage from '../../game/component/gamePage';
+import { generateDefaultNickname } from '../logic/appLogic';
 import '../../../../../scss/main.scss';
+import NetworkManager from '../../../network/networkManager';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      nickname: '',
-      socket: null,
+      nickname: generateDefaultNickname(),
+      networkManager: new NetworkManager(),
     };
     this.updateNickName = this.updateNickName.bind(this);
   }
 
   componentDidMount() {
-    this.connectSocket();
-  }
-
-  connectSocket() {
-    try {
-      console.log('connexion au serveur socket');
-      this.setState({
-        socket: io.connect(
-          serverAdress,
-          {
-            transports: ['websocket'],
-            reconnectionAttempts: 15,
-          },
-        ),
-      });
-    } catch (err) {
-      console.log(err);
-    }
+    const { networkManager, nickname } = this.state;
+    networkManager.sendPlayerData({ nickname });
   }
 
   updateNickName(e) {
-    this.setState({ nickname: e.target.value });
+    const { networkManager } = this.state;
+    this.setState(
+      { nickname: e.target.value },
+      networkManager.sendPlayerData({ nickname: e.target.value }),
+    );
   }
 
   render() {
-    const { socket, nickname } = this.state;
+    const { networkManager, nickname } = this.state;
     return (
       <BrowserRouter>
         <Switch>
           <Route exact path="/" component={TitlePage} />
           <Route
             path="/create"
-            render={() => <CreateGamePage socket={socket} nickname={nickname} />}
+            render={() => <CreateGamePage networkManager={networkManager} nickname={nickname} />}
           />
-          <Route path="/join" render={() => <JoinGamePage socket={socket} nickname={nickname} />} />
+          <Route
+            path="/join"
+            render={() => <JoinGamePage networkManager={networkManager} nickname={nickname} />}
+          />
+          <Route path="/lobby" render={() => <LobbyPage networkManager={networkManager} />} />
+          <Route path="/game" render={() => <GamePage networkManager={networkManager} />} />
           <Route
             path="/options"
             render={() => <OptionsPage updateNickName={this.updateNickName} nickname={nickname} />}
