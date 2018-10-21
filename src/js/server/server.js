@@ -8,6 +8,7 @@ const port = 4001;
 const app = express();
 
 const players = {};
+const games = [];
 
 app.use(express.static('dist'));
 
@@ -29,10 +30,10 @@ io.on('connection', (socket) => {
   //   io.sockets.emit('change color', color);
   // })
 
-  socket.on('createGame', (room) => {
-    players[socket.id] = { ...players[socket.id], game: room };
-    console.log(`room ${room} joined`);
-    socket.join(room);
+  socket.on('joinGame', (game) => {
+    players[socket.id] = { ...players[socket.id], game };
+    console.log(`game ${game} joined`);
+    socket.join(game);
   });
 
   socket.on('sendPlayerData', (playerData) => {
@@ -41,9 +42,13 @@ io.on('connection', (socket) => {
     console.log(players);
   });
 
-  socket.on('sendChatMessage', (message) => {
-    console.log(`Chat message ${message} sent`);
-    socket.to(players[socket.id].game).emit('sendChatMessageToGame', message);
+  socket.on('sendChatMessage', (content) => {
+    socket.emit('sendChatMessageToGame', { author: players[socket.id], content, date: new Date() });
+    // socket.to(players[socket.id].game).emit('sendChatMessageToGame', message);
+  });
+
+  socket.on('getAllGames', () => {
+    socket.emit('sendAllGames', io.sockets.adapter.rooms);
   });
 
   socket.on('disconnect', () => {

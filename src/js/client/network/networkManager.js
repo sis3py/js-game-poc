@@ -16,8 +16,8 @@ class NetworkManager {
     }
   }
 
-  createGame(name) {
-    this.socket.emit('createGame', name);
+  joinGame(name) {
+    this.socket.emit('joinGame', name);
   }
 
   sendPlayerData(playerData) {
@@ -28,9 +28,24 @@ class NetworkManager {
     this.socket.emit('sendChatMessage', chatMessage);
   }
 
-  handleMessageReceived(onMessageReceived) {
-    console.log('handleMessageReceived');
-    this.socket.on('sendChatMessageToGame', onMessageReceived);
+  registerChatMessageReceived(callback) {
+    this.socket.on('sendChatMessageToGame', callback);
+  }
+
+  unregisterChatMessageReceived() {
+    this.socket.off('sendChatMessageToGame');
+  }
+
+  getAllGames() {
+    this.socket.emit('getAllGames');
+  }
+
+  registerAllGamesReceived(callback) {
+    this.socket.on('sendAllGames', callback);
+  }
+
+  unregisterAllGamesReceived() {
+    this.socket.off('sendAllGames');
   }
 }
 

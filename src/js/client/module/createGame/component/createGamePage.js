@@ -19,7 +19,7 @@ class CreateGamePage extends React.Component {
   createGame() {
     const { networkManager } = this.props;
     const { gameName } = this.state;
-    networkManager.createGame(gameName);
+    networkManager.joinGame(gameName);
     this.setState({ isGameCreated: true });
   }
 

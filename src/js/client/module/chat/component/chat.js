@@ -1,44 +1,63 @@
 import React from 'react';
+import Message from '../classes/message';
 
 class Chat extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      content: [],
-      message: '',
+      messages: [],
+      currentMessage: '',
     };
     this.onChange = this.onChange.bind(this);
     this.sendChatMessage = this.sendChatMessage.bind(this);
-    this.updateContent = this.updateContent.bind(this);
+    this.updateMessages = this.updateMessages.bind(this);
+  }
+
+  componentWillMount() {
+    const { networkManager } = this.props;
+    networkManager.unregisterChatMessageReceived();
   }
 
   componentDidMount() {
     const { networkManager } = this.props;
-    networkManager.handleMessageReceived(this.updateContent);
+    networkManager.registerChatMessageReceived(this.updateMessages);
   }
 
   onChange(e) {
-    this.setState({ message: e.target.value });
+    this.setState({ currentMessage: e.target.value });
   }
 
   sendChatMessage() {
     const { networkManager } = this.props;
-    const { message } = this.state;
-    networkManager.sendChatMessage(message);
-    this.setState({ message: '' });
+    const { currentMessage } = this.state;
+    networkManager.sendChatMessage(currentMessage);
+    this.setState({ currentMessage: '' });
   }
 
-  updateContent(message) {
-    const { content } = this.state;
-    this.setState({ content: content.push(message) });
+  updateMessages(message) {
+    const { messages } = this.state;
+    this.setState({
+      messages: [...messages, new Message(message.content, message.author.nickname, message.date)],
+    });
+  }
+
+  renderMessages() {
+    const { messages } = this.state;
+    return messages.map((m, i) => (
+      <div key={i}>
+        <div>{m.author}</div>
+        <div>{m.content}</div>
+        <div>{m.formattedDate()}</div>
+      </div>
+    ));
   }
 
   render() {
-    const { content, message } = this.state;
+    const { currentMessage } = this.state;
     return (
       <div>
-        <div>{content}</div>
-        <textarea onChange={this.onChange} value={message} />
+        <div>{this.renderMessages()}</div>
+        <textarea onChange={this.onChange} value={currentMessage} />
         <input type="button" value="Send" onClick={this.sendChatMessage} />
       </div>
     );
