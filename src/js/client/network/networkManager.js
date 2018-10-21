@@ -20,6 +20,10 @@ class NetworkManager {
     this.socket.emit('joinGame', name);
   }
 
+  leaveGame(name) {
+    this.socket.emit('leaveGame', name);
+  }
+
   sendPlayerData(playerData) {
     this.socket.emit('sendPlayerData', playerData);
   }
@@ -46,6 +50,18 @@ class NetworkManager {
 
   unregisterAllGamesReceived() {
     this.socket.off('sendAllGames');
+  }
+
+  getPlayersInGame(game) {
+    this.socket.emit('getPlayersInGame', game);
+  }
+
+  registerPlayersInGameReceived(callback) {
+    this.socket.on('sendPlayersInGames', callback);
+  }
+
+  unregisterPlayersInGameReceived() {
+    this.socket.off('sendPlayersInGames');
   }
 }
 

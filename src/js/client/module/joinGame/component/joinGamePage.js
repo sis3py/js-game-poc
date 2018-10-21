@@ -6,7 +6,7 @@ class JoinGamePage extends React.Component {
     super(props);
     this.state = {
       games: [],
-      isGameJoined: false,
+      joinedGame: undefined,
     };
     this.updateGames = this.updateGames.bind(this);
     this.getAllGames = this.getAllGames.bind(this);
@@ -36,7 +36,7 @@ class JoinGamePage extends React.Component {
   joinGame(game) {
     const { networkManager } = this.props;
     networkManager.joinGame(game);
-    this.setState({ isGameJoined: true });
+    this.setState({ joinedGame: game });
   }
 
   renderGames() {
@@ -49,9 +49,9 @@ class JoinGamePage extends React.Component {
   }
 
   render() {
-    const { isGameJoined } = this.state;
-    if (isGameJoined) {
-      return <Redirect to="/lobby" />;
+    const { joinedGame } = this.state;
+    if (joinedGame) {
+      return <Redirect to={`/lobby/${joinedGame}`} />;
     }
     return (
       <div>

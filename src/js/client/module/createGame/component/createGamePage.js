@@ -6,7 +6,7 @@ class CreateGamePage extends React.Component {
     super(props);
     this.state = {
       gameName: '',
-      isGameCreated: false,
+      createdGame: undefined,
     };
     this.createGame = this.createGame.bind(this);
     this.updateGameName = this.updateGameName.bind(this);
@@ -20,13 +20,13 @@ class CreateGamePage extends React.Component {
     const { networkManager } = this.props;
     const { gameName } = this.state;
     networkManager.joinGame(gameName);
-    this.setState({ isGameCreated: true });
+    this.setState({ createdGame: gameName });
   }
 
   render() {
-    const { isGameCreated } = this.state;
-    if (isGameCreated) {
-      return <Redirect to="/lobby" />;
+    const { createdGame } = this.state;
+    if (createdGame) {
+      return <Redirect to={`/lobby/${createdGame}`} />;
     }
     const { gameName } = this.state;
     const { nickname } = this.props;

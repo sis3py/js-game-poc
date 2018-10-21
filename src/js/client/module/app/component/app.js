@@ -47,7 +47,12 @@ class App extends Component {
             path="/join"
             render={() => <JoinGamePage networkManager={networkManager} nickname={nickname} />}
           />
-          <Route path="/lobby" render={() => <LobbyPage networkManager={networkManager} />} />
+          <Route
+            path="/lobby/:name"
+            render={props => (
+              <LobbyPage name={props.match.params.name} networkManager={networkManager} />
+            )}
+          />
           <Route path="/game" render={() => <GamePage networkManager={networkManager} />} />
           <Route
             path="/options"

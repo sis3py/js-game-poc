@@ -8,7 +8,7 @@ const port = 4001;
 const app = express();
 
 const players = {};
-const games = [];
+const games = {};
 
 app.use(express.static('dist'));
 
@@ -31,9 +31,14 @@ io.on('connection', (socket) => {
   // })
 
   socket.on('joinGame', (game) => {
+    // Store the player
     players[socket.id] = { ...players[socket.id], game };
-    console.log(`game ${game} joined`);
+
     socket.join(game);
+  });
+
+  socket.on('leaveGame', (game) => {
+    socket.leave(game);
   });
 
   socket.on('sendPlayerData', (playerData) => {
@@ -43,12 +48,25 @@ io.on('connection', (socket) => {
   });
 
   socket.on('sendChatMessage', (content) => {
-    socket.emit('sendChatMessageToGame', { author: players[socket.id], content, date: new Date() });
-    // socket.to(players[socket.id].game).emit('sendChatMessageToGame', message);
+    io.in(players[socket.id].game).emit('sendChatMessageToGame', {
+      author: players[socket.id],
+      content,
+      date: new Date(),
+    });
   });
 
   socket.on('getAllGames', () => {
     socket.emit('sendAllGames', io.sockets.adapter.rooms);
+  });
+
+  socket.on('getPlayersInGame', (game) => {
+    socket.emit(
+      'sendPlayersInGames',
+      Object.keys(io.sockets.adapter.rooms[game].sockets).map(id => ({
+        id,
+        nickname: players[id].nickname,
+      })),
+    );
   });
 
   socket.on('disconnect', () => {
