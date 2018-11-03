@@ -39,7 +39,7 @@ const getGame = (gameId) => {
   };
 
   return game;
-// };
+};
 
 module.exports = {
   createGame,

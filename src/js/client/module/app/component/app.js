@@ -1,23 +1,23 @@
-import React, { Component } from "react";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import { MuiThemeProvider } from "@material-ui/core/styles";
-import TopBar from "../../topBar/component/topBar";
-import CreateGamePage from "../../createGame/component/createGamePage";
-import JoinGamePage from "../../joinGame/component/joinGamePage";
-import OptionsPage from "../../options/component/optionsPage";
-import LobbyPage from "../../lobby/component/lobbyPage";
-import GamePage from "../../game/component/gamePage";
-import "../../../../../scss/main.scss";
-import SocketManager from "../../../manager/socketManager";
-import { theme } from "../style/style";
+import React, { Component } from 'react';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import TopBar from '../../topBar/component/topBar';
+import CreateGamePage from '../../createGame/component/createGamePage';
+import JoinGamePage from '../../joinGame/component/joinGamePage';
+import OptionsPage from '../../options/component/optionsPage';
+import LobbyPage from '../../lobby/component/lobbyPage';
+import GamePage from '../../game/component/gamePage';
+import '../../../../../scss/main.scss';
+import SocketManager from '../../../manager/socketManager';
+import { theme } from '../style/style';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       socketManager: new SocketManager(),
-      currentPlayer: {}
+      currentPlayer: {},
     };
 
     this.setPlayer = this.setPlayer.bind(this);
@@ -51,24 +51,16 @@ class App extends Component {
             path="/"
             render={({ location }) => (
               <React.Fragment>
-                <TopBar
-                  path={location.pathname}
-                  currentPlayer={currentPlayer}
-                />
+                <TopBar path={location.pathname} currentPlayer={currentPlayer} />
                 <Switch>
                   <Route
                     path="/create"
-                    render={() => (
-                      <CreateGamePage socketManager={socketManager} />
-                    )}
+                    render={() => <CreateGamePage socketManager={socketManager} />}
                   />
                   <Route
                     path="/join"
                     render={() => (
-                      <JoinGamePage
-                        socketManager={socketManager}
-                        currentPlayer={currentPlayer}
-                      />
+                      <JoinGamePage socketManager={socketManager} currentPlayer={currentPlayer} />
                     )}
                   />
                   <Route
@@ -84,10 +76,7 @@ class App extends Component {
                   <Route
                     path="/game"
                     render={() => (
-                      <GamePage
-                        socketManager={socketManager}
-                        currentPlayer={currentPlayer}
-                      />
+                      <GamePage socketManager={socketManager} currentPlayer={currentPlayer} />
                     )}
                   />
                   <Route
