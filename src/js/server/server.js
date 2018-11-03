@@ -1,7 +1,6 @@
 const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
-<<<<<<< HEAD
 const {
   createGame,
   addPlayerToGame,
@@ -78,83 +77,6 @@ io.on('connection', (socket) => {
 });
 
 app.get('/*', (request, response) => {
-=======
-
-// our localhost port
-const port = 4001;
-
-const app = express();
-
-const players = {};
-const games = {};
-
-app.use(express.static('dist'));
-
-// our server instance
-const server = http.createServer(app);
-
-// This creates our socket using the instance of the server
-const io = socketIO(server);
-
-// This is what the socket.io syntax is like, we will work this later
-io.on('connection', (socket) => {
-  console.log('New client connected');
-
-  // // just like on the client side, we have a socket.on method that takes a callback function
-  // socket.on('change color', (color) => {
-  //   // once we get a 'change color' event from one of our clients, we will send it to the rest of the clients
-  //   // we make use of the socket.emit method again with the argument given to use from the callback function above
-  //   console.log('Color Changed to: ', color);
-  //   io.sockets.emit('change color', color);
-  // })
-
-  socket.on('joinGame', (game) => {
-    // Store the player
-    players[socket.id] = { ...players[socket.id], game };
-
-    socket.join(game);
-  });
-
-  socket.on('leaveGame', (game) => {
-    socket.leave(game);
-  });
-
-  socket.on('sendPlayerData', (playerData) => {
-    console.log(`Player data ${playerData} sent`);
-    players[socket.id] = { ...players[socket.id], ...playerData };
-    console.log(players);
-  });
-
-  socket.on('sendChatMessage', (content) => {
-    io.in(players[socket.id].game).emit('sendChatMessageToGame', {
-      author: players[socket.id],
-      content,
-      date: new Date(),
-    });
-  });
-
-  socket.on('getAllGames', () => {
-    socket.emit('sendAllGames', io.sockets.adapter.rooms);
-  });
-
-  socket.on('getPlayersInGame', (game) => {
-    socket.emit(
-      'sendPlayersInGames',
-      Object.keys(io.sockets.adapter.rooms[game].sockets).map(id => ({
-        id,
-        nickname: players[id].nickname,
-      })),
-    );
-  });
-
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-    delete players[socket.id];
-  });
-});
-
-app.get('/', (request, response) => {
->>>>>>> e7c6a4c47281a2ff81148d1af4a289d3aef8ab9e
   response.sendFile('dist/index.html');
 });
 
