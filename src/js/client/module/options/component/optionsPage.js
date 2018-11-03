@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
@@ -43,5 +44,21 @@ class OptionsPage extends Component {
     );
   }
 }
+=======
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const OptionsPage = ({ nickname, updateNickName }) => (
+  <div>
+    <div>
+      <span>Nickname</span>
+      <input type="text" value={nickname} onChange={updateNickName} />
+    </div>
+    <div>
+      <Link to="/">Back</Link>
+    </div>
+  </div>
+);
+>>>>>>> e7c6a4c47281a2ff81148d1af4a289d3aef8ab9e
 
 export default OptionsPage;
