@@ -1,8 +1,6 @@
-const { players } = require('../database/data');
-
 const buildChatMessage = (playerId, message) => {
   const chatMessage = {
-    author: players[playerId],
+    userId: playerId,
     content: message,
     date: new Date(),
   };

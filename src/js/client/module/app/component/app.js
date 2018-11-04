@@ -59,18 +59,12 @@ class App extends Component {
                   />
                   <Route
                     path="/join"
-                    render={() => (
-                      <JoinGamePage socketManager={socketManager} currentPlayer={currentPlayer} />
-                    )}
+                    render={() => <JoinGamePage socketManager={socketManager} />}
                   />
                   <Route
                     path="/lobby/:gameId"
                     render={props => (
-                      <LobbyPage
-                        gameId={props.match.params.gameId}
-                        socketManager={socketManager}
-                        currentPlayer={currentPlayer}
-                      />
+                      <LobbyPage gameId={props.match.params.gameId} socketManager={socketManager} />
                     )}
                   />
                   <Route

@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import { serverAdress } from '../../configuration/configuration';
+import { serverAdress } from '../../configuration/server';
 
 class SocketManager {
   constructor() {
@@ -85,11 +85,11 @@ class SocketManager {
   }
 
   registerGameReceived(callback) {
-    this.socket.on('updateGame', callback);
+    this.socket.on('sendGame', callback);
   }
 
   unregisterGameReceived() {
-    this.socket.off('updateGame');
+    this.socket.off('sendGame');
   }
 }
 

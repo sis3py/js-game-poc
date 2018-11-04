@@ -1,4 +1,4 @@
-import { getTime } from "../../../../helper/dateFormat";
+import { getTime } from '../../../../helper/dateFormat';
 
 class Message {
   constructor(content, author, date) {

@@ -7,39 +7,44 @@ const createGame = (gameName, creatorId) => {
   const gameId = guid();
 
   // Add the current room as game
-  games[gameId] = { id: gameId, name: gameName, players: [creatorId] };
+  games[gameId] = {
+    id: gameId,
+    name: gameName,
+    players: { [creatorId]: { id: creatorId, position: 1, ...players[creatorId] } },
+    nbPlayers: 1,
+  };
 
   return gameId;
 };
 
 // Add a player to an existing game
 const addPlayerToGame = (gameId, playerId) => {
-  games[gameId].players = [...games[gameId].players, playerId];
+  // Increase the number of players
+  games[gameId].nbPlayers = Object.keys(games[gameId].players).length + 1;
+
+  // Add the current player to the game players object
+  games[gameId].players = {
+    ...games[gameId].players,
+    playerId: { id: playerId, position: games[gameId].nbPlayers, ...players[playerId] },
+  };
 };
 
 const removePlayerFromGame = (gameId, playerId) => {
-  // Remove the current player to the game player list
-  games[gameId].players = games[gameId].players.filter(id => id !== playerId);
+  // Decrease the number of players
+  games[gameId].nbPlayers = games[gameId].players - 1;
+
+  // Remove the current player to the game player object
+  delete games[gameId].players[playerId];
 
   // If no more players, the game has to be deleted
-  if (games[gameId].players.length === 0) {
+  if (games[gameId].nbPlayers === 0) {
     delete games[gameId];
   }
 };
 
 const getAvailableGames = () => games;
 
-const getGame = (gameId) => {
-  const game = {
-    ...games[gameId],
-    players: games[gameId].players.map(id => ({
-      id,
-      nickname: players[id].nickname,
-    })),
-  };
-
-  return game;
-};
+const getGame = gameId => games[gameId];
 
 module.exports = {
   createGame,
