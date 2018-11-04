@@ -1,4 +1,4 @@
-const playerColors = Object.freeze({
+const playerColor = Object.freeze({
   1: '#e6194B',
   2: '#ffe119',
   3: '#4363d8',
@@ -9,4 +9,4 @@ const playerColors = Object.freeze({
   8: '#f58231',
 });
 
-export default playerColors;
+module.exports = { playerColor };

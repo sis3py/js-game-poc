@@ -11,7 +11,7 @@ const {
 const {
   addPlayer, removePlayer, getPlayer, updatePlayer,
 } = require('./logic/playerLogic');
-const { buildChatMessage } = require('./logic/chatLogic');
+const { buildChatMessage, buildChatNotification } = require('./logic/chatLogic');
 
 const port = 4001;
 const app = express();
@@ -27,6 +27,9 @@ io.on('connection', (socket) => {
     // Create the game and get the id
     const gameId = createGame(gameName, socket.id);
 
+    // Update the player data with the game id
+    updatePlayer(socket.id, { game: { id: gameId } });
+
     // Join the room related to the given game
     socket.join(gameId);
 
@@ -38,6 +41,18 @@ io.on('connection', (socket) => {
     // Add the current player to the game player list
     addPlayerToGame(gameId, socket.id);
 
+    // Update the player data with the game id
+    updatePlayer(socket.id, { game: { id: gameId } });
+
+    // Get the player
+    const player = getPlayer(socket.id);
+
+    // Send a notification about this
+    io.in(gameId).emit(
+      'sendChatMessageToGame',
+      buildChatNotification(`${player.nickname} joined the game`),
+    );
+
     // Join the room related to the given game
     socket.join(gameId);
   });
@@ -46,8 +61,20 @@ io.on('connection', (socket) => {
     // Remove the current player from the game player list
     removePlayerFromGame(gameId, socket.id);
 
+    // Update the player data with the game id
+    updatePlayer(socket.id, { game: { id: undefined } });
+
     // Leave the room related to the given game
     socket.leave(gameId);
+
+    // Get the player
+    const player = getPlayer(socket.id);
+
+    // Send a notification about this
+    io.in(gameId).emit(
+      'sendChatMessageToGame',
+      buildChatNotification(`${player.nickname} left the game`),
+    );
   });
 
   socket.on('getCurrentPlayer', () => {
@@ -72,6 +99,20 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    // Get the player
+    const player = getPlayer(socket.id);
+
+    // Remove the current player from the game player list
+    if (player.game.id) {
+      removePlayerFromGame(player.game.id, socket.id);
+      // Send a notification about this
+      io.in(player.game.id).emit(
+        'sendChatMessageToGame',
+        buildChatNotification(`${player.nickname} left the game`),
+      );
+    }
+
+    // Remove the player from the player list
     removePlayer(socket.id);
   });
 });

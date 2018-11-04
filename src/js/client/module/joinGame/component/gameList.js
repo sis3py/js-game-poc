@@ -5,6 +5,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import { maxPlayers } from '../../../../configuration/game';
 
 const GamesList = ({ games, joinGame }) => (
   <Paper>
@@ -21,7 +22,7 @@ const GamesList = ({ games, joinGame }) => (
             <TableCell component="th" scope="row">
               {game.name}
             </TableCell>
-            <TableCell>todo</TableCell>
+            <TableCell>{`${game.nbPlayers} / ${maxPlayers}`}</TableCell>
           </TableRow>
         ))}
       </TableBody>

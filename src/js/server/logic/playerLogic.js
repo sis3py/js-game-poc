@@ -4,7 +4,11 @@ const { getRandomInt } = require('../../helper/random');
 const generateDefaultNickname = () => `player-${getRandomInt(1, 100000)}`;
 
 const addPlayer = (playerId) => {
-  players[playerId] = { nickname: generateDefaultNickname() };
+  players[playerId] = {
+    id: playerId,
+    nickname: generateDefaultNickname(),
+    game: { id: undefined },
+  };
 };
 
 const removePlayer = (playerId) => {
@@ -18,5 +22,8 @@ const updatePlayer = (playerId, data) => {
 };
 
 module.exports = {
-  addPlayer, removePlayer, getPlayer, updatePlayer,
+  addPlayer,
+  removePlayer,
+  getPlayer,
+  updatePlayer,
 };

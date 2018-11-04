@@ -9,7 +9,7 @@ class LobbyPage extends React.Component {
     this.state = {
       isGameLaunched: false,
       gameName: '',
-      players: {},
+      players: [],
     };
     this.updateGame = this.updateGame.bind(this);
   }
@@ -32,9 +32,7 @@ class LobbyPage extends React.Component {
 
   renderPlayers() {
     const { players } = this.state;
-    return Object.keys(players).map(playerId => (
-      <div key={playerId}>{players[playerId].nickname}</div>
-    ));
+    return players.map(player => <div key={player.id}>{player.nickname}</div>);
   }
 
   render() {

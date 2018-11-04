@@ -1,10 +1,12 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 import Message from '../classes/message';
 import { chatStyle } from '../style/style';
-import playerColors from '../../../enum/playerColors';
+import { playerColor } from '../../../../enum/playerColor';
+import { messageType } from '../../../../enum/messageType';
 
 class Chat extends React.Component {
   constructor(props) {
@@ -13,6 +15,7 @@ class Chat extends React.Component {
       messages: [],
       currentMessage: '',
     };
+    this.onKeyPress = this.onKeyPress.bind(this);
     this.onChange = this.onChange.bind(this);
     this.sendChatMessage = this.sendChatMessage.bind(this);
     this.updateMessages = this.updateMessages.bind(this);
@@ -32,6 +35,12 @@ class Chat extends React.Component {
     this.setState({ currentMessage: e.target.value });
   }
 
+  onKeyPress(e) {
+    if (e.key === 'Enter') {
+      this.sendChatMessage();
+    }
+  }
+
   sendChatMessage() {
     const { socketManager, roomId } = this.props;
     const { currentMessage } = this.state;
@@ -40,46 +49,85 @@ class Chat extends React.Component {
   }
 
   updateMessages(message) {
-    const { players } = this.props;
     const { messages } = this.state;
     this.setState({
-      messages: [...messages, new Message(message.content, players[message.userId], message.date)],
+      messages: [
+        ...messages,
+        new Message(message.content, message.author, message.date, message.type),
+      ],
     });
   }
 
   renderMessages() {
     const { classes } = this.props;
     const { messages } = this.state;
-    return messages.map((m, i) => (
-      <div key={i} className={classes.message}>
-        <div className={classes.date}>{`[${m.formattedDate()}]`}</div>
-        <div className={classes.author} style={{ color: playerColors[m.author.position] }}>
-          {`${m.author.nickname}:`}
-        </div>
-        <div className={classes.content}>{m.content}</div>
+    return messages.map((message, index) => {
+      switch (message.type) {
+        case messageType.standard:
+          return this.renderStandardMessage(index, classes, message);
+        case messageType.notification:
+        case messageType.alert:
+          return Chat.renderNotificationMessage(index, classes, message);
+        default:
+          throw new Error(`Message type not handled (${message.type})`);
+      }
+    });
+  }
+
+  static renderNotificationMessage(key, classes, message) {
+    return (
+      <div key={key} className={`${classes.message} ${classes.notification}`}>
+        <div className={classes.date}>{`[${message.formattedDate()}]`}</div>
+        <div>{message.content}</div>
       </div>
-    ));
+    );
+  }
+
+  renderStandardMessage(key, classes, message) {
+    const { players } = this.props;
+    return (
+      <div key={key} className={classes.message}>
+        <div className={classes.date}>{`[${message.formattedDate()}]`}</div>
+        <div
+          className={classes.author}
+          style={{
+            color: playerColor[players.findIndex(player => player.id === message.author.id) + 1],
+          }}
+        >
+          {`${message.author.nickname}:`}
+        </div>
+        <div className={classes.content}>{message.content}</div>
+      </div>
+    );
   }
 
   render() {
     const { classes } = this.props;
     const { currentMessage } = this.state;
     return (
-      <div className={classes.chat}>
+      <Paper className={classes.chat}>
         <div className={classes.messages}>{this.renderMessages()}</div>
         <div className={classes.actions}>
           <TextField
+            className={classes.textfield}
             type="text"
             multiline
             placeholder="Enter message..."
             onChange={this.onChange}
+            onKeyPress={this.onKeyPress}
             value={currentMessage}
           />
-          <Button size="large" color="primary" variant="contained" onClick={this.sendChatMessage}>
+          <Button
+            className={classes.button}
+            size="large"
+            color="primary"
+            variant="contained"
+            onClick={this.sendChatMessage}
+          >
             Send
           </Button>
         </div>
-      </div>
+      </Paper>
     );
   }
 }

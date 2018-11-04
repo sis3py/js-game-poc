@@ -13,16 +13,16 @@ export const chatStyle = {
     width: '100%',
     overflowY: 'scroll',
   },
-  actions: {
-    height: 40,
-    width: '100%',
-  },
   message: {
     height: 20,
     width: '100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'left',
+  },
+  notification: {
+    color: '#ffa500',
+    fontStyle: 'italic',
   },
   date: {
     marginRight: 10,
@@ -32,5 +32,18 @@ export const chatStyle = {
   },
   content: {
     color: '#FFFFFF',
+  },
+  actions: {
+    display: 'flex',
+    alignItems: 'center',
+    height: 40,
+    width: '100%',
+  },
+  textfield: {
+    width: 'calc(100% - 160px)',
+    marginRight: 10,
+  },
+  button: {
+    width: 150,
   },
 };
