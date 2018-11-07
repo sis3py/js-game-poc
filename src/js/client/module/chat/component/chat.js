@@ -5,7 +5,6 @@ import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 import Message from '../classes/message';
 import { chatStyle } from '../style/style';
-import { playerColor } from '../../../../enum/playerColor';
 import { messageType } from '../../../../enum/messageType';
 
 class Chat extends React.Component {
@@ -84,16 +83,11 @@ class Chat extends React.Component {
   }
 
   renderStandardMessage(key, classes, message) {
-    const { players } = this.props;
+    const { colorByPlayer } = this.props;
     return (
       <div key={key} className={classes.message}>
         <div className={classes.date}>{`[${message.formattedDate()}]`}</div>
-        <div
-          className={classes.author}
-          style={{
-            color: playerColor[players.findIndex(player => player.id === message.author.id) + 1],
-          }}
-        >
+        <div className={classes.author} style={{ color: colorByPlayer[message.author.id] }}>
           {`${message.author.nickname}:`}
         </div>
         <div className={classes.content}>{message.content}</div>

@@ -84,6 +84,10 @@ class SocketManager {
     this.socket.emit('getGame', gameId);
   }
 
+  setPlayerReady(gameId) {
+    this.socket.emit('setPlayerReady', gameId);
+  }
+
   registerGameReceived(callback) {
     this.socket.on('sendGame', callback);
   }

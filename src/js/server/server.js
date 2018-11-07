@@ -12,6 +12,7 @@ const {
   addPlayer, removePlayer, getPlayer, updatePlayer,
 } = require('./logic/playerLogic');
 const { buildChatMessage, buildChatNotification } = require('./logic/chatLogic');
+const { playerStatus } = require('../enum/playerStatus');
 
 const port = 4001;
 const app = express();
@@ -27,8 +28,16 @@ io.on('connection', (socket) => {
     // Create the game and get the id
     const gameId = createGame(gameName, socket.id);
 
-    // Update the player data with the game id
-    updatePlayer(socket.id, { game: { id: gameId } });
+    // Update the player data :
+    // - set the game id
+    // - set the player status to in lobby
+    updatePlayer(socket.id, { game: { id: gameId }, status: playerStatus.inLobbyNotReady });
+
+    // Get the player
+    const player = getPlayer(socket.id);
+
+    // Send the updated current player
+    socket.emit('sendCurrentPlayer', player);
 
     // Join the room related to the given game
     socket.join(gameId);
@@ -41,11 +50,16 @@ io.on('connection', (socket) => {
     // Add the current player to the game player list
     addPlayerToGame(gameId, socket.id);
 
-    // Update the player data with the game id
-    updatePlayer(socket.id, { game: { id: gameId } });
+    // Update the player data :
+    // - set the game id
+    // - set the player status to in lobby
+    updatePlayer(socket.id, { game: { id: gameId }, status: playerStatus.inLobbyNotReady });
 
     // Get the player
     const player = getPlayer(socket.id);
+
+    // Send the updated current player
+    socket.emit('sendCurrentPlayer', player);
 
     // Send a notification about this
     io.in(gameId).emit(
@@ -61,20 +75,33 @@ io.on('connection', (socket) => {
     // Remove the current player from the game player list
     removePlayerFromGame(gameId, socket.id);
 
-    // Update the player data with the game id
-    updatePlayer(socket.id, { game: { id: undefined } });
-
-    // Leave the room related to the given game
-    socket.leave(gameId);
+    // - unset the game id
+    // - set the player status to in online
+    updatePlayer(socket.id, { game: { id: undefined }, status: playerStatus.online });
 
     // Get the player
     const player = getPlayer(socket.id);
 
-    // Send a notification about this
-    io.in(gameId).emit(
-      'sendChatMessageToGame',
-      buildChatNotification(`${player.nickname} left the game`),
-    );
+    // Send the updated current player
+    socket.emit('sendCurrentPlayer', player);
+
+    // Leave the room related to the given game
+    socket.leave(gameId);
+
+    // Get the game
+    const game = getGame(gameId);
+
+    // Only if the game is still existing
+    if (game) {
+      // Send the game data to every players that are still in the game
+      io.in(game.id).emit('sendGame', getGame(game.id));
+
+      // Send a notification about this
+      io.in(game.id).emit(
+        'sendChatMessageToGame',
+        buildChatNotification(`${player.nickname} left the game`),
+      );
+    }
   });
 
   socket.on('getCurrentPlayer', () => {
@@ -98,18 +125,46 @@ io.on('connection', (socket) => {
     io.in(gameId).emit('sendGame', getGame(gameId));
   });
 
+  socket.on('setPlayerReady', (gameId) => {
+    // Set the player status to lobby ready
+    updatePlayer(socket.id, { status: playerStatus.inLobbyReady });
+
+    // Get the player
+    const player = getPlayer(socket.id);
+
+    // Send the updated current player
+    socket.emit('sendCurrentPlayer', player);
+
+    // Send the new data related to the game
+    io.in(gameId).emit('sendGame', getGame(gameId));
+  });
+
   socket.on('disconnect', () => {
     // Get the player
     const player = getPlayer(socket.id);
 
-    // Remove the current player from the game player list
-    if (player.game.id) {
-      removePlayerFromGame(player.game.id, socket.id);
-      // Send a notification about this
-      io.in(player.game.id).emit(
-        'sendChatMessageToGame',
-        buildChatNotification(`${player.nickname} left the game`),
-      );
+    // Get the player game id
+    const gameId = player.game.id;
+
+    // Only if the player was in a game
+    if (gameId) {
+      // Remove the current player from the game player list
+      removePlayerFromGame(gameId, socket.id);
+
+      // Get the game
+      const game = getGame(gameId);
+
+      // Only if the game is still existing
+      if (game) {
+        // Send the game data to every players that are still in the game
+        io.in(gameId).emit('sendGame', getGame(gameId));
+
+        // Send a notification about this
+        io.in(gameId).emit(
+          'sendChatMessageToGame',
+          buildChatNotification(`${player.nickname} left the game`),
+        );
+      }
     }
 
     // Remove the player from the player list

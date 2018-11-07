@@ -64,7 +64,11 @@ class App extends Component {
                   <Route
                     path="/lobby/:gameId"
                     render={props => (
-                      <LobbyPage gameId={props.match.params.gameId} socketManager={socketManager} />
+                      <LobbyPage
+                        socketManager={socketManager}
+                        gameId={props.match.params.gameId}
+                        currentPlayer={currentPlayer}
+                      />
                     )}
                   />
                   <Route

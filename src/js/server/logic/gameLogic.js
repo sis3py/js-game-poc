@@ -31,11 +31,22 @@ const removePlayerFromGame = (gameId, playerId) => {
   games[gameId].nbPlayers -= 1;
 
   // Remove the current player to the game player array
-  games[gameId].players = games[gameId].players.filter(p => p.id === playerId);
+  games[gameId].players = games[gameId].players.filter(p => p.id !== playerId);
 
   // If no more players, the game has to be deleted
   if (games[gameId].nbPlayers === 0) {
     delete games[gameId];
+  }
+};
+
+const updatePlayerFromGame = (player) => {
+  // Each time the player data are updated
+  // A new player instance is created due to immutability
+  // So we need to update the game with the updated player reference
+  if (player.game.id) {
+    games[player.game.id].players = games[player.game.id].players.map(
+      p => (p.id === player.id ? player : p),
+    );
   }
 };
 
@@ -49,4 +60,5 @@ module.exports = {
   removePlayerFromGame,
   getAvailableGames,
   getGame,
+  updatePlayerFromGame,
 };
