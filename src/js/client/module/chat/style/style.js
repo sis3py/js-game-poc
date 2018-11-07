@@ -4,9 +4,10 @@ export const chatStyle = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: 10,
+    padding: 20,
     width: '100%',
     height: '100%',
+    background: '#0f0f0f',
   },
   messages: {
     height: 'calc(100% - 40px)',
@@ -14,7 +15,7 @@ export const chatStyle = {
     overflowY: 'scroll',
   },
   message: {
-    height: 20,
+    minHeight: 20,
     width: '100%',
     display: 'flex',
     alignItems: 'center',
@@ -37,9 +38,12 @@ export const chatStyle = {
     display: 'flex',
     alignItems: 'center',
     height: 40,
+    marginTop: 10,
     width: '100%',
   },
   textfield: {
+    paddingLeft: 10,
+    border: '1px solid #a6e22e',
     width: 'calc(100% - 160px)',
     marginRight: 10,
   },

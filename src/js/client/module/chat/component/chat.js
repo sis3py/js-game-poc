@@ -18,11 +18,19 @@ class Chat extends React.Component {
     this.onChange = this.onChange.bind(this);
     this.sendChatMessage = this.sendChatMessage.bind(this);
     this.updateMessages = this.updateMessages.bind(this);
+    this.scrollToBottom = this.scrollToBottom.bind(this);
   }
 
   componentDidMount() {
     const { socketManager } = this.props;
     socketManager.registerChatMessageReceived(this.updateMessages);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { messages } = this.state;
+    if (messages.length > prevState.messages.length) {
+      this.scrollToBottom();
+    }
   }
 
   componentWillUnmount() {
@@ -38,6 +46,10 @@ class Chat extends React.Component {
     if (e.key === 'Enter') {
       this.sendChatMessage();
     }
+  }
+
+  scrollToBottom() {
+    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
   }
 
   sendChatMessage() {
@@ -100,12 +112,20 @@ class Chat extends React.Component {
     const { currentMessage } = this.state;
     return (
       <Paper className={classes.chat}>
-        <div className={classes.messages}>{this.renderMessages()}</div>
+        <div
+          className={classes.messages}
+          ref={(el) => {
+            this.messagesContainer = el;
+          }}
+        >
+          {this.renderMessages()}
+        </div>
         <div className={classes.actions}>
           <TextField
+            autoFocus
             className={classes.textfield}
             type="text"
-            multiline
+            InputProps={{ disableUnderline: true }}
             placeholder="Enter message..."
             onChange={this.onChange}
             onKeyPress={this.onKeyPress}
