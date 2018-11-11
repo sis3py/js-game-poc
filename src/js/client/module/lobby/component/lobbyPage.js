@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link, Redirect } from 'react-router-dom';
-import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import Chat from '../../chat/component/chat';
 import Title from './title';
 import SlotGrid from './slotGrid';
+import Page from '../../common/component/page';
 import { lobbyStyle } from '../style/style';
 import { getColorByPlayer } from '../../common/logic/commonLogic';
 import { playerStatus } from '../../../../enum/playerStatus';
@@ -58,29 +59,33 @@ class LobbyPage extends React.Component {
       return <Redirect to="/game" />;
     }
     return (
-      <div>
-        <Title title={gameName} />
-        <SlotGrid players={players} colorByPlayer={colorByPlayer} />
-        <div className={classes.actions}>
-          <Button component={Link} to="/" size="large" color="secondary" variant="contained">
-            Leave lobby
-          </Button>
-          {currentPlayer.status === playerStatus.inLobbyNotReady && (
-            <Button
-              className={classes.readyButton}
-              size="large"
-              color="primary"
-              variant="contained"
-              onClick={this.setPlayerReady}
-            >
-              Ready
+      <Page>
+        <div className={classes.leftPanel}>
+          <SlotGrid players={players} colorByPlayer={colorByPlayer} />
+        </div>
+        <div className={classes.rightPanel}>
+          <Title title={gameName} />
+          <div className={classes.chat}>
+            <Chat socketManager={socketManager} roomId={gameId} colorByPlayer={colorByPlayer} />
+          </div>
+          <div className={classes.actions}>
+            <Button component={Link} to="/" size="large" color="secondary" variant="contained">
+              Leave lobby
             </Button>
-          )}
+            {currentPlayer.status === playerStatus.inLobbyNotReady && (
+              <Button
+                className={classes.readyButton}
+                size="large"
+                color="primary"
+                variant="contained"
+                onClick={this.setPlayerReady}
+              >
+                Ready
+              </Button>
+            )}
+          </div>
         </div>
-        <div className={classes.chat}>
-          <Chat socketManager={socketManager} roomId={gameId} colorByPlayer={colorByPlayer} />
-        </div>
-      </div>
+      </Page>
     );
   }
 }

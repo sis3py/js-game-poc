@@ -1,3 +1,13 @@
+export const pageStyle = {
+  page: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: 40,
+    marginLeft: 40,
+    marginRight: 40,
+  },
+};
+
 export const userStyle = {
   user: {
     fontFamily: ['Roboto', 'Helvetica', 'Arial', 'sans-serif'],

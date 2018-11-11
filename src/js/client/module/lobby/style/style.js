@@ -1,31 +1,35 @@
+const slotItemSize = 140;
+const slotItemMargin = 10;
+
 export const lobbyStyle = {
-  readyButton: {
-    marginLeft: 'auto',
-    marginRight: 'auto',
+  leftPanel: {
+    width: '50%',
+  },
+  rightPanel: {
+    width: '50%',
   },
   chat: {
     fontFamily: ['Roboto', 'Helvetica', 'Arial', 'sans-serif'],
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: 10,
     width: '100%',
-    height: '200px',
+    height: '400px',
+  },
+  actions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    marginTop: 20,
+  },
+  readyButton: {
+    width: 200,
+    marginLeft: 30,
   },
 };
 
 export const titleStyle = {
   title: {
-    fontFamily: ['Roboto', 'Helvetica', 'Arial', 'sans-serif'],
-    fontSize: 20,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-    width: '50%',
-    height: '50%',
-    marginLeft: 'auto',
-    marginRight: 'auto',
+    fontWeight: 'bold',
   },
 };
 
@@ -34,11 +38,11 @@ export const slotGridStyle = {
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingLeft: 10,
-    paddingTop: 10,
-    paddingBottom: 10,
-    width: '450px',
-    height: '230px',
+    paddingLeft: slotItemMargin,
+    paddingTop: slotItemMargin,
+    paddingBottom: slotItemMargin,
+    width: slotItemSize * 2 + slotItemMargin * 3,
+    height: slotItemSize * 4 + slotItemMargin * 5,
     marginLeft: 'auto',
     marginRight: 'auto',
   },
@@ -53,14 +57,14 @@ export const slotGridItemStyle = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
-    width: '100px',
-    height: '100px',
+    marginRight: slotItemMargin,
+    width: slotItemSize,
+    height: slotItemSize,
   },
   ready: {
     position: 'absolute',
     color: '#a6e22e',
-    fontSize: 36,
+    fontSize: 48,
     right: 0,
     bottom: 0,
   },
@@ -74,11 +78,11 @@ export const emptySlotGridItemStyle = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
-    width: '100px',
-    height: '100px',
+    marginRight: slotItemMargin,
+    width: slotItemSize,
+    height: slotItemSize,
     '&:first-child': {
-      marginLeft: 10,
+      marginLeft: slotItemMargin,
     },
   },
 };

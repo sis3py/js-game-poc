@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import { optionsStyle } from '../style/style';
+import Page from '../../common/component/page';
 
 class OptionsPage extends Component {
   constructor(props) {
@@ -26,7 +29,7 @@ class OptionsPage extends Component {
   render() {
     const { nickname } = this.state;
     return (
-      <div>
+      <Page>
         <div>
           <span>Nickname</span>
           <TextField type="text" label="Nickname" onChange={this.updateNickName} value={nickname} />
@@ -39,9 +42,9 @@ class OptionsPage extends Component {
             Back
           </Button>
         </div>
-      </div>
+      </Page>
     );
   }
 }
 
-export default OptionsPage;
+export default withStyles(optionsStyle)(OptionsPage);

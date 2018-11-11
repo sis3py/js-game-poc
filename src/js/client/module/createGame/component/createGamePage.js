@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link, Redirect } from 'react-router-dom';
+import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import FormLabel from '@material-ui/core/FormLabel';
+import Page from '../../common/component/page';
+import { createGameStyle } from '../style/style';
 
 class CreateGamePage extends React.Component {
   constructor(props) {
@@ -48,29 +51,31 @@ class CreateGamePage extends React.Component {
     }
     const { gameName } = this.state;
     return (
-      <Grid container alignContent="center" alignItems="center" spacing={16}>
-        <Grid item xs={6}>
-          <FormLabel>Create Game</FormLabel>
-          <TextField
-            type="text"
-            label="Game name"
-            onChange={this.updateGameName}
-            value={gameName}
-          />
+      <Page>
+        <Grid container alignContent="center" alignItems="center" spacing={16}>
+          <Grid item xs={6}>
+            <FormLabel>Create Game</FormLabel>
+            <TextField
+              type="text"
+              label="Game name"
+              onChange={this.updateGameName}
+              value={gameName}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <Button size="large" color="primary" variant="contained" onClick={this.createGame}>
+              Create
+            </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Button component={Link} to="/" size="large" color="secondary" variant="contained">
+              Back
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item xs={6}>
-          <Button size="large" color="primary" variant="contained" onClick={this.createGame}>
-            Create
-          </Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Button component={Link} to="/" size="large" color="secondary" variant="contained">
-            Back
-          </Button>
-        </Grid>
-      </Grid>
+      </Page>
     );
   }
 }
 
-export default CreateGamePage;
+export default withStyles(createGameStyle)(CreateGamePage);

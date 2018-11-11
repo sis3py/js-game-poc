@@ -1,7 +1,10 @@
 import React from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+import Page from '../../common/component/page';
 import GamesList from './gameList';
+import { joinGameStyle } from '../style/style';
 
 class JoinGamePage extends React.Component {
   constructor(props) {
@@ -42,24 +45,28 @@ class JoinGamePage extends React.Component {
   }
 
   render() {
+    const { classes } = this.props;
     const { joinedGameId, games } = this.state;
     if (joinedGameId) {
       return <Redirect to={`/lobby/${joinedGameId}`} />;
     }
     return (
-      <div>
-        <GamesList games={games} joinGame={this.joinGame} />
-        <Button size="large" color="primary" variant="contained" onClick={this.getAllGames}>
-          Refresh
-        </Button>
-        <div>
-          <Button component={Link} to="/" size="large" color="secondary" variant="contained">
-            Back
+      <Page>
+        <div className={classes.panel}>
+          <GamesList games={games} joinGame={this.joinGame} />
+          <Button
+            className={classes.refreshButton}
+            size="large"
+            color="primary"
+            variant="contained"
+            onClick={this.getAllGames}
+          >
+            Refresh
           </Button>
         </div>
-      </div>
+      </Page>
     );
   }
 }
 
-export default JoinGamePage;
+export default withStyles(joinGameStyle)(JoinGamePage);

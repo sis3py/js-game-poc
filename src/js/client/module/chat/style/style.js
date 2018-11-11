@@ -26,6 +26,7 @@ export const chatStyle = {
     fontStyle: 'italic',
   },
   date: {
+    color: '#a6e22e',
     marginRight: 10,
   },
   author: {
