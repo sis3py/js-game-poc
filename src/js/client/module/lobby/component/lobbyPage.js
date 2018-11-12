@@ -7,6 +7,7 @@ import Title from './title';
 import SlotGrid from './slotGrid';
 import Page from '../../common/component/page';
 import { lobbyStyle } from '../style/style';
+import { isGameReadyToBeLaunched } from '../logic/logic';
 import { getColorByPlayer } from '../../common/logic/commonLogic';
 import { playerStatus } from '../../../../enum/playerStatus';
 
@@ -15,7 +16,7 @@ class LobbyPage extends React.Component {
     super(props);
     this.state = {
       isLoading: true,
-      isGameLaunched: false,
+      isGameReadyToBeLaunched: false,
       gameName: '',
       players: [],
     };
@@ -41,7 +42,12 @@ class LobbyPage extends React.Component {
   }
 
   updateGame(game) {
-    this.setState({ gameName: game.name, players: game.players, isLoading: false });
+    this.setState({
+      gameName: game.name,
+      players: game.players,
+      isLoading: false,
+      isGameReadyToBeLaunched: isGameReadyToBeLaunched(game),
+    });
   }
 
   render() {
@@ -49,14 +55,14 @@ class LobbyPage extends React.Component {
       socketManager, gameId, currentPlayer, classes,
     } = this.props;
     const {
-      isLoading, isGameLaunched, gameName, players,
+      isLoading, isGameReadyToBeLaunched, gameName, players,
     } = this.state;
     const colorByPlayer = getColorByPlayer(players);
     if (isLoading) {
       return <div>Loading...</div>;
     }
-    if (isGameLaunched) {
-      return <Redirect to="/game" />;
+    if (isGameReadyToBeLaunched) {
+      return <Redirect to={`/game/${gameId}`} />;
     }
     return (
       <Page>

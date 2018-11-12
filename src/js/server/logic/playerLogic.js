@@ -1,7 +1,6 @@
 const { players } = require('../database/data');
 const { getRandomInt } = require('../../helper/random');
 const { playerStatus } = require('../../enum/playerStatus');
-const { updatePlayerFromGame } = require('./gameLogic');
 
 const generateDefaultNickname = () => `player-${getRandomInt(1, 100000)}`;
 
@@ -23,9 +22,6 @@ const getPlayer = playerId => players[playerId];
 const updatePlayer = (playerId, data) => {
   // Update the player data
   players[playerId] = { ...players[playerId], ...data };
-
-  // Update the game data
-  updatePlayerFromGame(players[playerId]);
 };
 
 module.exports = {

@@ -1,46 +1,54 @@
-import React, { Component } from "react";
-import Phaser from "phaser";
-import GameScene from "../../../game/scenes/gameScene";
+import React from 'react';
+import { withStyles } from '@material-ui/core/styles';
+import { gameStyle } from '../style/style';
+import Page from '../../common/component/page';
+import Game from './game';
+import Chat from '../../chat/component/chat';
+import { getColorByPlayer } from '../../common/logic/commonLogic';
 
-class Game extends Component {
+class GamePage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      game: {}
+      isLoading: true,
+      players: [],
     };
+    this.updateGame = this.updateGame.bind(this);
   }
 
   componentDidMount() {
-    const config = {
-      type: Phaser.AUTO,
-      // width: 500,
-      // height: 500,
-      physics: {
-        default: "arcade",
-        arcade: {
-          gravity: { y: 0 },
-          debug: false
-        }
-      },
-      scene: [GameScene]
-    };
-
-    // let game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create, update: update, render: render });
-    this.setState({ game: new Phaser.Game(config) });
+    const { gameId, socketManager } = this.props;
+    console.log(gameId);
+    socketManager.getGame(gameId);
   }
 
   componentWillUnmount() {
-    const { game } = this.state;
-    game.destroy(true);
+    const { gameId, socketManager } = this.props;
+    socketManager.leaveGame(gameId);
   }
 
-  componentDidCatch(error, info) {
-    console.warn(error, info);
+  updateGame(game) {
+    this.setState({
+      players: game.players,
+      isLoading: false,
+    });
   }
 
   render() {
-    return <div />;
+    const { socketManager, gameId, classes } = this.props;
+    const { isLoading, players } = this.state;
+    const colorByPlayer = getColorByPlayer(players);
+    return (
+      <Page>
+        <div className={classes.leftPanel}>
+          <Game socketManager={socketManager} />
+        </div>
+        <div className={classes.rightPanel}>
+          <Chat socketManager={socketManager} roomId={gameId} colorByPlayer={colorByPlayer} />
+        </div>
+      </Page>
+    );
   }
 }
 
-export default Game;
+export default withStyles(gameStyle)(GamePage);

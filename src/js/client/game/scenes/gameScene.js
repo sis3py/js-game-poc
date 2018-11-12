@@ -1,29 +1,29 @@
-import EasyStar from "easystarjs";
+import EasyStar from 'easystarjs';
 
 class GameScene extends Phaser.Scene {
-  constructor(test) {
+  constructor() {
     super({
-      key: "GameScene"
+      key: 'GameScene',
     });
+    this.socketManager = null;
     this.gameOver = false;
     this.isMoving = false;
   }
 
   faceNextTile(tween) {
     console.log(this);
-    const isVerticalMovement =
-      Math.abs(this.player.y - this.monster.y) < 100 ||
-      Math.abs(this.monster.y - this.player.y) < 100;
+    const isVerticalMovement = Math.abs(this.player.y - this.monster.y) < 100
+      || Math.abs(this.monster.y - this.player.y) < 100;
     if (isVerticalMovement) {
       if (this.player.x > this.monster.x) {
-        this.monster.anims.play("monsterRight", false);
+        this.monster.anims.play('monsterRight', false);
       } else {
-        this.monster.anims.play("monsterLeft", true);
+        this.monster.anims.play('monsterLeft', true);
       }
     } else if (this.player.y > this.monster.y) {
-      this.monster.anims.play("monsterDown", true);
+      this.monster.anims.play('monsterDown', true);
     } else {
-      this.monster.anims.play("monsterUp", true);
+      this.monster.anims.play('monsterUp', true);
     }
   }
 
@@ -35,7 +35,7 @@ class GameScene extends Phaser.Scene {
       Math.floor(this.monster.y / 32),
       Math.floor(this.player.x / 32),
       Math.floor(this.player.y / 32),
-      path => {
+      (path) => {
         if (path === null) {
           // console.warn("Path was not found.");
         } else {
@@ -50,15 +50,15 @@ class GameScene extends Phaser.Scene {
               targets: that.monster,
               x: { value: ex * 32, duration: 200 },
               y: { value: ey * 32, duration: 200 },
-              onStart: that.faceNextTile.bind(that)
+              onStart: that.faceNextTile.bind(that),
             });
           }
           that.tweens.killAll();
           that.tweens.timeline({
-            tweens
+            tweens,
           });
         }
-      }
+      },
     );
     this.finder.calculate();
   }
@@ -72,16 +72,13 @@ class GameScene extends Phaser.Scene {
 
     if (stars.countActive(true) === 0) {
       //  A new batch of stars to collect
-      stars.children.iterate(child => {
+      stars.children.iterate((child) => {
         child.enableBody(true, child.x, 0, true, true);
       });
 
-      const x =
-        player.x < 400
-          ? Phaser.Math.Between(400, 800)
-          : Phaser.Math.Between(0, 400);
+      const x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
-      const bomb = bombs.create(x, 16, "bomb");
+      const bomb = bombs.create(x, 16, 'bomb');
       bomb.setBounce(1);
       bomb.setCollideWorldBounds(true);
       bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
@@ -94,15 +91,15 @@ class GameScene extends Phaser.Scene {
 
     this.player.setTint(0xff0000);
 
-    this.player.anims.play("playerImmobile");
-    this.monster.anims.play("monsterImmobile");
+    this.player.anims.play('playerImmobile');
+    this.monster.anims.play('monsterImmobile');
 
     this.gameOver = true;
 
-    this.add.text(30, 30, "Gamer over", {
-      fontSize: "32px",
-      fontWeight: "bold",
-      fill: "#FF0000"
+    this.add.text(30, 30, 'Gamer over', {
+      fontSize: '32px',
+      fontWeight: 'bold',
+      fill: '#FF0000',
     });
   }
 
@@ -111,37 +108,39 @@ class GameScene extends Phaser.Scene {
     return tile.index;
   }
 
+  init(data) {
+    // Init the socket manager
+    const { socketManager } = data;
+    this.socketManager = socketManager;
+  }
+
   preload() {
-    this.load.image("sky", "assets/sky.png");
-    this.load.image("ground", "assets/platform.png");
-    this.load.image("star", "assets/star.png");
-    this.load.image("bomb", "assets/bomb.png");
-    this.load.image("tiles", "assets/tilemaps/tiles/main.png");
-    this.load.tilemapTiledJSON("map", "assets/tilemaps/maps/main.json");
+    this.load.image('sky', '/assets/sky.png');
+    this.load.image('ground', '/assets/platform.png');
+    this.load.image('star', '/assets/star.png');
+    this.load.image('bomb', '/assets/bomb.png');
+    this.load.image('tiles', '/assets/tilemaps/tiles/main.png');
+    this.load.tilemapTiledJSON('map', '/assets/tilemaps/maps/main.json');
 
     // Characters sprite sheet
-    this.load.spritesheet("all", "assets/spritesheets/all.jpg", {
+    this.load.spritesheet('all', '/assets/spritesheets/all.jpg', {
       frameWidth: 48,
-      frameHeight: 48
+      frameHeight: 48,
     });
 
     // Monster sprite sheet
-    this.load.spritesheet(
-      "monster",
-      "assets/spritesheets/armored_monster.png",
-      {
-        frameWidth: 43,
-        frameHeight: 64
-      }
-    );
+    this.load.spritesheet('monster', '/assets/spritesheets/armored_monster.png', {
+      frameWidth: 43,
+      frameHeight: 64,
+    });
   }
 
   create() {
-    const map = this.make.tilemap({ key: "map" });
+    const map = this.make.tilemap({ key: 'map' });
 
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
     // of the tileset image used when loading the file in preload.
-    const tiles = map.addTilesetImage("main", "tiles");
+    const tiles = map.addTilesetImage('main', 'tiles');
 
     // You can load a layer from the map using the layer name from Tiled, or by using the layer
     // index (0 in this case).
@@ -171,10 +170,10 @@ class GameScene extends Phaser.Scene {
     // platforms.create(800, 250, 'ground');
 
     // The player and its settings
-    this.player = this.physics.add.sprite(100, 450, "all");
+    this.player = this.physics.add.sprite(100, 450, 'all');
 
     // The player and its settings
-    this.monster = this.physics.add.sprite(300, 400, "monster");
+    this.monster = this.physics.add.sprite(300, 400, 'monster');
 
     //  Player physics properties. Give the little guy a slight bounce.
     // player.setBounce(0.5);
@@ -229,75 +228,75 @@ class GameScene extends Phaser.Scene {
 
     // Player animations
     this.anims.create({
-      key: "playerLeft",
-      frames: this.anims.generateFrameNumbers("all", { start: 69, end: 71 }),
+      key: 'playerLeft',
+      frames: this.anims.generateFrameNumbers('all', { start: 69, end: 71 }),
       frameRate: 10,
-      repeat: -1
+      repeat: -1,
     });
 
     this.anims.create({
-      key: "playerImmobile",
-      frames: [{ key: "all", frame: 58 }],
-      frameRate: 20
+      key: 'playerImmobile',
+      frames: [{ key: 'all', frame: 58 }],
+      frameRate: 20,
     });
 
     this.anims.create({
-      key: "playerRight",
-      frames: this.anims.generateFrameNumbers("all", { start: 81, end: 83 }),
+      key: 'playerRight',
+      frames: this.anims.generateFrameNumbers('all', { start: 81, end: 83 }),
       frameRate: 10,
-      repeat: -1
+      repeat: -1,
     });
 
     this.anims.create({
-      key: "playerUp",
-      frames: this.anims.generateFrameNumbers("all", { start: 93, end: 95 }),
+      key: 'playerUp',
+      frames: this.anims.generateFrameNumbers('all', { start: 93, end: 95 }),
       frameRate: 10,
-      repeat: -1
+      repeat: -1,
     });
 
     this.anims.create({
-      key: "playerDown",
-      frames: this.anims.generateFrameNumbers("all", { start: 57, end: 59 }),
+      key: 'playerDown',
+      frames: this.anims.generateFrameNumbers('all', { start: 57, end: 59 }),
       frameRate: 10,
-      repeat: -1
+      repeat: -1,
     });
 
     // Monster animations
     this.anims.create({
-      key: "monsterLeft",
-      frames: this.anims.generateFrameNumbers("monster", { start: 4, end: 7 }),
+      key: 'monsterLeft',
+      frames: this.anims.generateFrameNumbers('monster', { start: 4, end: 7 }),
       frameRate: 10,
-      repeat: -1
+      repeat: -1,
     });
 
     this.anims.create({
-      key: "monsterImmobile",
-      frames: [{ key: "monster", frame: 2 }],
-      frameRate: 20
+      key: 'monsterImmobile',
+      frames: [{ key: 'monster', frame: 2 }],
+      frameRate: 20,
     });
 
     this.anims.create({
-      key: "monsterRight",
-      frames: this.anims.generateFrameNumbers("monster", { start: 8, end: 11 }),
+      key: 'monsterRight',
+      frames: this.anims.generateFrameNumbers('monster', { start: 8, end: 11 }),
       frameRate: 10,
-      repeat: -1
+      repeat: -1,
     });
 
     this.anims.create({
-      key: "monsterUp",
-      frames: this.anims.generateFrameNumbers("monster", {
+      key: 'monsterUp',
+      frames: this.anims.generateFrameNumbers('monster', {
         start: 12,
-        end: 15
+        end: 15,
       }),
       frameRate: 10,
-      repeat: -1
+      repeat: -1,
     });
 
     this.anims.create({
-      key: "monsterDown",
-      frames: this.anims.generateFrameNumbers("monster", { start: 0, end: 3 }),
+      key: 'monsterDown',
+      frames: this.anims.generateFrameNumbers('monster', { start: 0, end: 3 }),
       frameRate: 10,
-      repeat: -1
+      repeat: -1,
     });
 
     //  Input Events
@@ -320,9 +319,9 @@ class GameScene extends Phaser.Scene {
     const bombs = this.physics.add.group();
 
     //  The score
-    const scoreText = this.add.text(16, 16, "score: 0", {
-      fontSize: "32px",
-      fill: "#000"
+    const scoreText = this.add.text(16, 16, 'score: 0', {
+      fontSize: '32px',
+      fill: '#000',
     });
 
     //  Collide the player and the monster
@@ -333,19 +332,13 @@ class GameScene extends Phaser.Scene {
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     // this.physics.add.overlap(player, stars, collectStar, null, this);
 
-    this.physics.add.collider(
-      this.player,
-      this.monster,
-      this.monsterCatch,
-      null,
-      this
-    );
+    this.physics.add.collider(this.player, this.monster, this.monsterCatch, null, this);
 
     const recalculAIEvent = this.time.addEvent({
       delay: 1000,
       callback: this.calculAIAndMove,
       callbackScope: this,
-      loop: true
+      loop: true,
     });
   }
 
@@ -362,32 +355,32 @@ class GameScene extends Phaser.Scene {
     if (this.cursors.up.isDown) {
       this.player.setVelocityY(-160);
 
-      this.player.anims.play("playerUp", true);
+      this.player.anims.play('playerUp', true);
       this.isMoving = true;
     } else if (this.cursors.down.isDown) {
       this.player.setVelocityY(160);
 
-      this.player.anims.play("playerDown", true);
+      this.player.anims.play('playerDown', true);
       this.isMoving = true;
     } else if (this.cursors.left.isDown) {
       this.player.setVelocityX(-160);
 
-      this.player.anims.play("playerLeft", true);
+      this.player.anims.play('playerLeft', true);
       this.isMoving = true;
     } else if (this.cursors.right.isDown) {
       this.player.setVelocityX(160);
 
-      this.player.anims.play("playerRight", true);
+      this.player.anims.play('playerRight', true);
       this.isMoving = true;
     }
 
     if (
-      !this.cursors.left.isDown &&
-      !this.cursors.right.isDown &&
-      !this.cursors.up.isDown &&
-      !this.cursors.down.isDown
+      !this.cursors.left.isDown
+      && !this.cursors.right.isDown
+      && !this.cursors.up.isDown
+      && !this.cursors.down.isDown
     ) {
-      this.player.anims.play("playerImmobile", true);
+      this.player.anims.play('playerImmobile', true);
       this.isMoving = false;
     }
 

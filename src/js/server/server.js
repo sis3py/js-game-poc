@@ -7,11 +7,14 @@ const {
   removePlayerFromGame,
   getAvailableGames,
   getGame,
+  updateGameStatus,
+  isGameReadyToStart,
 } = require('./logic/gameLogic');
 const {
   addPlayer, removePlayer, getPlayer, updatePlayer,
 } = require('./logic/playerLogic');
 const { buildChatMessage, buildChatNotification } = require('./logic/chatLogic');
+const { gameStatus } = require('../enum/gameStatus');
 const { playerStatus } = require('../enum/playerStatus');
 
 const port = 4001;
@@ -134,6 +137,11 @@ io.on('connection', (socket) => {
 
     // Send the updated current player
     socket.emit('sendCurrentPlayer', player);
+
+    // Start the game if all players are ready
+    if (isGameReadyToStart(gameId)) {
+      updateGameStatus(gameId, gameStatus.started);
+    }
 
     // Send the new data related to the game
     io.in(gameId).emit('sendGame', getGame(gameId));

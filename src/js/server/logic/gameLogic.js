@@ -1,3 +1,5 @@
+const { gameStatus } = require('../../enum/gameStatus');
+const { playerStatus } = require('../../enum/playerStatus');
 const { guid } = require('../../helper/guid');
 const { games, players } = require('../database/data');
 
@@ -10,8 +12,9 @@ const createGame = (gameName, creatorId) => {
   games[gameId] = {
     id: gameId,
     name: gameName,
-    players: [players[creatorId]],
+    players: [creatorId],
     nbPlayers: 1,
+    status: gameStatus.created,
   };
 
   return gameId;
@@ -22,8 +25,8 @@ const addPlayerToGame = (gameId, playerId) => {
   // Increase the number of players
   games[gameId].nbPlayers += 1;
 
-  // Add the current player to the game players array
-  games[gameId].players = [...games[gameId].players, players[playerId]];
+  // Add the current player id to the game players id array
+  games[gameId].players = [...games[gameId].players, playerId];
 };
 
 const removePlayerFromGame = (gameId, playerId) => {
@@ -31,7 +34,7 @@ const removePlayerFromGame = (gameId, playerId) => {
   games[gameId].nbPlayers -= 1;
 
   // Remove the current player to the game player array
-  games[gameId].players = games[gameId].players.filter(p => p.id !== playerId);
+  games[gameId].players = games[gameId].players.filter(id => id !== playerId);
 
   // If no more players, the game has to be deleted
   if (games[gameId].nbPlayers === 0) {
@@ -39,20 +42,20 @@ const removePlayerFromGame = (gameId, playerId) => {
   }
 };
 
-const updatePlayerFromGame = (player) => {
-  // Each time the player data are updated
-  // A new player instance is created due to immutability
-  // So we need to update the game with the updated player reference
-  if (player.game.id) {
-    games[player.game.id].players = games[player.game.id].players.map(
-      p => (p.id === player.id ? player : p),
-    );
-  }
+const updateGameStatus = (gameId, status) => {
+  games[gameId] = {
+    ...games[gameId],
+    status,
+  };
 };
 
+const isGameReadyToStart = gameId => games[gameId].players.every(id => players[id].status === playerStatus.inLobbyReady);
 const getAvailableGames = () => games;
 
-const getGame = gameId => games[gameId];
+const getGame = gameId => ({
+  ...games[gameId],
+  players: games[gameId].players.map(id => players[id]),
+});
 
 module.exports = {
   createGame,
@@ -60,5 +63,6 @@ module.exports = {
   removePlayerFromGame,
   getAvailableGames,
   getGame,
-  updatePlayerFromGame,
+  updateGameStatus,
+  isGameReadyToStart,
 };
