@@ -95,6 +95,18 @@ class SocketManager {
   unregisterGameReceived() {
     this.socket.off('sendGame');
   }
+
+  sendCurrentPlayerPosition(data) {
+    this.socket.emit('sendCurrentPlayerPosition', data);
+  }
+
+  registerPlayerPositionReceived(callback) {
+    this.socket.on('sendPlayerPosition', callback);
+  }
+
+  unregisterPlayerPositionReceived() {
+    this.socket.off('sendPlayerPosition');
+  }
 }
 
 export default SocketManager;

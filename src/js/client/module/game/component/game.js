@@ -26,9 +26,9 @@ class Game extends Component {
     };
     this.setState({ game: new Phaser.Game(config) }, () => {
       const { game } = this.state;
-      const { socketManager } = this.props;
+      const { socketManager, gameId } = this.props;
       game.scene.add('GameScene', GameScene, false);
-      game.scene.start('GameScene', { socketManager });
+      game.scene.start('GameScene', { socketManager, gameId });
     });
   }
 

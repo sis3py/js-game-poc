@@ -1,4 +1,5 @@
 import EasyStar from 'easystarjs';
+import { direction as playerDirection } from '../../../enum/direction';
 
 class GameScene extends Phaser.Scene {
   constructor() {
@@ -11,7 +12,6 @@ class GameScene extends Phaser.Scene {
   }
 
   faceNextTile(tween) {
-    console.log(this);
     const isVerticalMovement = Math.abs(this.player.y - this.monster.y) < 100
       || Math.abs(this.monster.y - this.player.y) < 100;
     if (isVerticalMovement) {
@@ -110,8 +110,9 @@ class GameScene extends Phaser.Scene {
 
   init(data) {
     // Init the socket manager
-    const { socketManager } = data;
+    const { socketManager, gameId } = data;
     this.socketManager = socketManager;
+    this.gameId = gameId;
   }
 
   preload() {
@@ -340,12 +341,18 @@ class GameScene extends Phaser.Scene {
       callbackScope: this,
       loop: true,
     });
+
+    this.socketManager.registerPlayerPositionReceived((this.updatePlayerPosition));
+  }
+
+  updatePlayerPosition({ direction, x, y }) {
+    console.log({ direction, x, y });
+    this.player2.x = x;
+    this.player2.y = y;
+    this.player2.anims.play(direction, true);
   }
 
   update() {
-    const that = this;
-    // this.tweens.killAll();
-
     this.player.setVelocity(0);
 
     if (this.gameOver) {
@@ -356,21 +363,50 @@ class GameScene extends Phaser.Scene {
       this.player.setVelocityY(-160);
 
       this.player.anims.play('playerUp', true);
+      this.socketManager.sendCurrentPlayerPosition({
+        gameId: this.gameId,
+        positionData: {
+          direction: playerDirection.up,
+          x: this.player.x,
+          y: this.player.y,
+        },
+      });
       this.isMoving = true;
     } else if (this.cursors.down.isDown) {
       this.player.setVelocityY(160);
-
       this.player.anims.play('playerDown', true);
+      this.socketManager.sendCurrentPlayerPosition({
+        gameId: this.gameId,
+        positionData: {
+          direction: playerDirection.down,
+          x: this.player.x,
+          y: this.player.y,
+        },
+      });
       this.isMoving = true;
     } else if (this.cursors.left.isDown) {
       this.player.setVelocityX(-160);
-
       this.player.anims.play('playerLeft', true);
+      this.socketManager.sendCurrentPlayerPosition({
+        gameId: this.gameId,
+        positionData: {
+          direction: playerDirection.left,
+          x: this.player.x,
+          y: this.player.y,
+        },
+      });
       this.isMoving = true;
     } else if (this.cursors.right.isDown) {
       this.player.setVelocityX(160);
-
       this.player.anims.play('playerRight', true);
+      this.socketManager.sendCurrentPlayerPosition({
+        gameId: this.gameId,
+        positionData: {
+          direction: playerDirection.right,
+          x: this.player.x,
+          y: this.player.y,
+        },
+      });
       this.isMoving = true;
     }
 

@@ -18,13 +18,14 @@ class GamePage extends React.Component {
 
   componentDidMount() {
     const { gameId, socketManager } = this.props;
-    console.log(gameId);
     socketManager.getGame(gameId);
+    socketManager.registerGameReceived(this.updateGame);
   }
 
   componentWillUnmount() {
     const { gameId, socketManager } = this.props;
     socketManager.leaveGame(gameId);
+    socketManager.unregisterGameReceived();
   }
 
   updateGame(game) {
@@ -41,10 +42,12 @@ class GamePage extends React.Component {
     return (
       <Page>
         <div className={classes.leftPanel}>
-          <Game socketManager={socketManager} />
+          <Game socketManager={socketManager} gameId={gameId} />
         </div>
         <div className={classes.rightPanel}>
-          <Chat socketManager={socketManager} roomId={gameId} colorByPlayer={colorByPlayer} />
+          <div className={classes.chat}>
+            <Chat socketManager={socketManager} roomId={gameId} colorByPlayer={colorByPlayer} />
+          </div>
         </div>
       </Page>
     );

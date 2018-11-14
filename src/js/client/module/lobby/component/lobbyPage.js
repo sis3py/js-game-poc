@@ -32,7 +32,10 @@ class LobbyPage extends React.Component {
 
   componentWillUnmount() {
     const { gameId, socketManager } = this.props;
-    socketManager.leaveGame(gameId);
+    // TODO HOWTO To handle :
+    // We need to leave the game if the user leaves the page
+    // EXCEPT if the user is redirected to the game
+    // socketManager.leaveGame(gameId);
     socketManager.unregisterGameReceived();
   }
 

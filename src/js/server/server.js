@@ -147,6 +147,15 @@ io.on('connection', (socket) => {
     io.in(gameId).emit('sendGame', getGame(gameId));
   });
 
+  socket.on('sendCurrentPlayerPosition', ({ gameId, positionData }) => {
+    console.log({ gameId, positionData });
+    // Update the current player coordinates
+    updatePlayer(socket.id, { position: { x: positionData.x, y: positionData.y } });
+
+    // Send the current player new coordinates to the other players
+    socket.to(gameId).emit('sendPlayerPosition', positionData);
+  });
+
   socket.on('disconnect', () => {
     // Get the player
     const player = getPlayer(socket.id);

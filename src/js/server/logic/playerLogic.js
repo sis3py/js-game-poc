@@ -10,6 +10,7 @@ const addPlayer = (playerId) => {
     nickname: generateDefaultNickname(),
     game: { id: undefined },
     status: playerStatus.online,
+    position: { x: 0, y: 0 },
   };
 };
 

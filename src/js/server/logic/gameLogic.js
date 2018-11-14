@@ -50,6 +50,7 @@ const updateGameStatus = (gameId, status) => {
 };
 
 const isGameReadyToStart = gameId => games[gameId].players.every(id => players[id].status === playerStatus.inLobbyReady);
+
 const getAvailableGames = () => games;
 
 const getGame = gameId => ({
