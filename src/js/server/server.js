@@ -147,13 +147,23 @@ io.on('connection', (socket) => {
     io.in(gameId).emit('sendGame', getGame(gameId));
   });
 
-  socket.on('sendCurrentPlayerPosition', ({ gameId, positionData }) => {
-    console.log({ gameId, positionData });
+  socket.on('sendCurrentPlayerCoordinates', ({ gameId, coordinatesData }) => {
     // Update the current player coordinates
-    updatePlayer(socket.id, { position: { x: positionData.x, y: positionData.y } });
+    updatePlayer(socket.id, {
+      coordinates: {
+        x: coordinatesData.x,
+        y: coordinatesData.y,
+        direction: coordinatesData.direction,
+      },
+    });
 
     // Send the current player new coordinates to the other players
-    socket.to(gameId).emit('sendPlayerPosition', positionData);
+    socket.to(gameId).emit('sendPlayerCoordinates', { playerId: socket.id, coordinatesData });
+  });
+
+  socket.on('sendCurrentPlayerStop', ({ gameId, coordinatesData }) => {
+    // Send the current player stop action to the other players
+    socket.to(gameId).emit('sendPlayerStop', { playerId: socket.id, coordinatesData });
   });
 
   socket.on('disconnect', () => {

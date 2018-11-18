@@ -1,5 +1,6 @@
 import EasyStar from 'easystarjs';
 import { direction as playerDirection } from '../../../enum/direction';
+import { getInitialCoordinates, getPlayers } from '../logic/playerLogic';
 
 class GameScene extends Phaser.Scene {
   constructor() {
@@ -7,20 +8,25 @@ class GameScene extends Phaser.Scene {
       key: 'GameScene',
     });
     this.socketManager = null;
+    this.currentPlayer = null;
+    this.players = null;
     this.gameOver = false;
     this.isMoving = false;
+
+    this.updatePlayerCoordinates = this.updatePlayerCoordinates.bind(this);
+    this.stopPlayer = this.stopPlayer.bind(this);
   }
 
   faceNextTile(tween) {
-    const isVerticalMovement = Math.abs(this.player.y - this.monster.y) < 100
-      || Math.abs(this.monster.y - this.player.y) < 100;
+    const isVerticalMovement = Math.abs(this.players[this.currentPlayer.id].sprite.y - this.monster.y) < 100
+      || Math.abs(this.monster.y - this.players[this.currentPlayer.id].sprite.y) < 100;
     if (isVerticalMovement) {
-      if (this.player.x > this.monster.x) {
+      if (this.players[this.currentPlayer.id].sprite.x > this.monster.x) {
         this.monster.anims.play('monsterRight', false);
       } else {
         this.monster.anims.play('monsterLeft', true);
       }
-    } else if (this.player.y > this.monster.y) {
+    } else if (this.players[this.currentPlayer.id].sprite.y > this.monster.y) {
       this.monster.anims.play('monsterDown', true);
     } else {
       this.monster.anims.play('monsterUp', true);
@@ -33,8 +39,8 @@ class GameScene extends Phaser.Scene {
     this.finder.findPath(
       Math.floor(this.monster.x / 32),
       Math.floor(this.monster.y / 32),
-      Math.floor(this.player.x / 32),
-      Math.floor(this.player.y / 32),
+      Math.floor(this.players[this.currentPlayer.id].sprite.x / 32),
+      Math.floor(this.players[this.currentPlayer.id].sprite.y / 32),
       (path) => {
         if (path === null) {
           // console.warn("Path was not found.");
@@ -63,35 +69,35 @@ class GameScene extends Phaser.Scene {
     this.finder.calculate();
   }
 
-  collectStar(player, star) {
-    star.disableBody(true, true);
+  // collectStar(player, star) {
+  //   star.disableBody(true, true);
 
-    //  Add and update the score
-    score += 10;
-    scoreText.setText(`Score: ${score}`);
+  //   //  Add and update the score
+  //   score += 10;
+  //   scoreText.setText(`Score: ${score}`);
 
-    if (stars.countActive(true) === 0) {
-      //  A new batch of stars to collect
-      stars.children.iterate((child) => {
-        child.enableBody(true, child.x, 0, true, true);
-      });
+  //   if (stars.countActive(true) === 0) {
+  //     //  A new batch of stars to collect
+  //     stars.children.iterate((child) => {
+  //       child.enableBody(true, child.x, 0, true, true);
+  //     });
 
-      const x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+  //     const x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
-      const bomb = bombs.create(x, 16, 'bomb');
-      bomb.setBounce(1);
-      bomb.setCollideWorldBounds(true);
-      bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-      bomb.allowGravity = false;
-    }
-  }
+  //     const bomb = bombs.create(x, 16, 'bomb');
+  //     bomb.setBounce(1);
+  //     bomb.setCollideWorldBounds(true);
+  //     bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+  //     bomb.allowGravity = false;
+  //   }
+  // }
 
   monsterCatch() {
     this.physics.pause();
 
-    this.player.setTint(0xff0000);
+    this.players[this.currentPlayer.id].sprite.setTint(0xff0000);
 
-    this.player.anims.play('playerImmobile');
+    this.players[this.currentPlayer.id].sprite.anims.play('playerImmobile');
     this.monster.anims.play('monsterImmobile');
 
     this.gameOver = true;
@@ -108,11 +114,24 @@ class GameScene extends Phaser.Scene {
     return tile.index;
   }
 
+  addPlayer(playerId, position, layer) {
+    const initialCoordinates = getInitialCoordinates(position);
+    this.players[playerId].sprite = this.physics.add.sprite(initialCoordinates.x, initialCoordinates.y, 'all');
+    this.physics.add.collider(this.players[playerId].sprite, layer);
+    this.players[playerId].sprite.setCollideWorldBounds(true);
+    this.physics.add.collider(this.players[playerId].sprite, this.monster, this.monsterCatch, null, this);
+    // this.players[playerId].anims.play(direction);
+  }
+
   init(data) {
-    // Init the socket manager
-    const { socketManager, gameId } = data;
+    // Init the data
+    const {
+      socketManager, gameId, currentPlayer, players,
+    } = data;
     this.socketManager = socketManager;
     this.gameId = gameId;
+    this.currentPlayer = currentPlayer;
+    this.players = getPlayers(players);
   }
 
   preload() {
@@ -170,19 +189,17 @@ class GameScene extends Phaser.Scene {
     // platforms.create(50, 270, 'ground');
     // platforms.create(800, 250, 'ground');
 
-    // The player and its settings
-    this.player = this.physics.add.sprite(100, 450, 'all');
-
-    // The player and its settings
+    // Create the monster
     this.monster = this.physics.add.sprite(300, 400, 'monster');
+
+    // Create the players
+    Object.keys(this.players).forEach((id) => this.addPlayer(this.players[id].id, this.players[id].position, layer));
 
     //  Player physics properties. Give the little guy a slight bounce.
     // player.setBounce(0.5);
-    this.player.setCollideWorldBounds(true);
 
     this.monster.setCollideWorldBounds(true);
 
-    this.physics.add.collider(this.player, layer);
     this.physics.add.collider(this.monster, layer);
 
     // this.physics.world.setBounds(0, 0, 1500, 1500);
@@ -192,7 +209,7 @@ class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
-    this.cameras.main.startFollow(this.player);
+    this.cameras.main.startFollow(this.players[this.currentPlayer.id].sprite);
 
     this.cameras.main.followOffset.set(0, 0);
 
@@ -229,34 +246,34 @@ class GameScene extends Phaser.Scene {
 
     // Player animations
     this.anims.create({
-      key: 'playerLeft',
+      key: `player_${playerDirection.left}`,
       frames: this.anims.generateFrameNumbers('all', { start: 69, end: 71 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: 'playerImmobile',
+      key: 'player_immobile',
       frames: [{ key: 'all', frame: 58 }],
       frameRate: 20,
     });
 
     this.anims.create({
-      key: 'playerRight',
+      key: `player_${playerDirection.right}`,
       frames: this.anims.generateFrameNumbers('all', { start: 81, end: 83 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: 'playerUp',
+      key: `player_${playerDirection.up}`,
       frames: this.anims.generateFrameNumbers('all', { start: 93, end: 95 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: 'playerDown',
+      key: `player_${playerDirection.down}`,
       frames: this.anims.generateFrameNumbers('all', { start: 57, end: 59 }),
       frameRate: 10,
       repeat: -1,
@@ -317,13 +334,13 @@ class GameScene extends Phaser.Scene {
 
     // });
 
-    const bombs = this.physics.add.group();
+    // const bombs = this.physics.add.group();
 
-    //  The score
-    const scoreText = this.add.text(16, 16, 'score: 0', {
-      fontSize: '32px',
-      fill: '#000',
-    });
+    // //  The score
+    // const scoreText = this.add.text(16, 16, 'score: 0', {
+    //   fontSize: '32px',
+    //   fill: '#000',
+    // });
 
     //  Collide the player and the monster
     // this.physics.add.collider(player, monster);
@@ -333,78 +350,84 @@ class GameScene extends Phaser.Scene {
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     // this.physics.add.overlap(player, stars, collectStar, null, this);
 
-    this.physics.add.collider(this.player, this.monster, this.monsterCatch, null, this);
+    // const recalculAIEvent = this.time.addEvent({
+    //   delay: 1000,
+    //   callback: this.calculAIAndMove,
+    //   callbackScope: this,
+    //   loop: true,
+    // });
 
-    const recalculAIEvent = this.time.addEvent({
-      delay: 1000,
-      callback: this.calculAIAndMove,
-      callbackScope: this,
-      loop: true,
-    });
-
-    this.socketManager.registerPlayerPositionReceived((this.updatePlayerPosition));
+    this.socketManager.registerPlayerCoordinatesReceived(this.updatePlayerCoordinates);
+    this.socketManager.registerPlayerStopReceived(this.stopPlayer);
   }
 
-  updatePlayerPosition({ direction, x, y }) {
-    console.log({ direction, x, y });
-    this.player2.x = x;
-    this.player2.y = y;
-    this.player2.anims.play(direction, true);
+  updatePlayerCoordinates({ playerId, coordinatesData }) {
+    console.log(this);
+    console.log(this.players);
+    this.players[playerId].sprite.x = coordinatesData.x;
+    this.players[playerId].sprite.y = coordinatesData.y;
+    this.players[playerId].sprite.anims.play(`player_${coordinatesData.direction}`, true);
+  }
+
+  stopPlayer({ playerId, coordinatesData }) {
+    this.players[playerId].sprite.x = coordinatesData.x;
+    this.player[playerId].sprite.y = coordinatesData.y;
+    this.player[playerId].sprite.anims.play('player_immobile', true);
   }
 
   update() {
-    this.player.setVelocity(0);
+    this.players[this.currentPlayer.id].sprite.setVelocity(0);
 
     if (this.gameOver) {
       return;
     }
 
     if (this.cursors.up.isDown) {
-      this.player.setVelocityY(-160);
+      this.players[this.currentPlayer.id].sprite.setVelocityY(-160);
 
-      this.player.anims.play('playerUp', true);
-      this.socketManager.sendCurrentPlayerPosition({
+      this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.up}`, true);
+      this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
-        positionData: {
+        coordinatesData: {
           direction: playerDirection.up,
-          x: this.player.x,
-          y: this.player.y,
+          x: this.players[this.currentPlayer.id].sprite.x,
+          y: this.players[this.currentPlayer.id].sprite.y,
         },
       });
       this.isMoving = true;
     } else if (this.cursors.down.isDown) {
-      this.player.setVelocityY(160);
-      this.player.anims.play('playerDown', true);
-      this.socketManager.sendCurrentPlayerPosition({
+      this.players[this.currentPlayer.id].sprite.setVelocityY(160);
+      this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.down}`, true);
+      this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
-        positionData: {
+        coordinatesData: {
           direction: playerDirection.down,
-          x: this.player.x,
-          y: this.player.y,
+          x: this.players[this.currentPlayer.id].sprite.x,
+          y: this.players[this.currentPlayer.id].sprite.y,
         },
       });
       this.isMoving = true;
     } else if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-160);
-      this.player.anims.play('playerLeft', true);
-      this.socketManager.sendCurrentPlayerPosition({
+      this.players[this.currentPlayer.id].sprite.setVelocityX(-160);
+      this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.left}`, true);
+      this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
-        positionData: {
+        coordinatesData: {
           direction: playerDirection.left,
-          x: this.player.x,
-          y: this.player.y,
+          x: this.players[this.currentPlayer.id].sprite.x,
+          y: this.players[this.currentPlayer.id].sprite.y,
         },
       });
       this.isMoving = true;
     } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(160);
-      this.player.anims.play('playerRight', true);
-      this.socketManager.sendCurrentPlayerPosition({
+      this.players[this.currentPlayer.id].sprite.setVelocityX(160);
+      this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.right}`, true);
+      this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
-        positionData: {
+        coordinatesData: {
           direction: playerDirection.right,
-          x: this.player.x,
-          y: this.player.y,
+          x: this.players[this.currentPlayer.id].sprite.x,
+          y: this.players[this.currentPlayer.id].sprite.y,
         },
       });
       this.isMoving = true;
@@ -416,7 +439,16 @@ class GameScene extends Phaser.Scene {
       && !this.cursors.up.isDown
       && !this.cursors.down.isDown
     ) {
-      this.player.anims.play('playerImmobile', true);
+      this.players[this.currentPlayer.id].sprite.body.velocity.x = 0;
+      this.players[this.currentPlayer.id].sprite.body.velocity.y = 0;
+      this.players[this.currentPlayer.id].sprite.anims.play('player_immobile', true);
+      this.socketManager.sendCurrentPlayerStop({
+        gameId: this.gameId,
+        coordinatesData: {
+          x: this.players[this.currentPlayer.id].sprite.x,
+          y: this.players[this.currentPlayer.id].sprite.y,
+        },
+      });
       this.isMoving = false;
     }
 

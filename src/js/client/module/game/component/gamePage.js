@@ -36,13 +36,23 @@ class GamePage extends React.Component {
   }
 
   render() {
-    const { socketManager, gameId, classes } = this.props;
+    const {
+      socketManager, gameId, currentPlayer, classes,
+    } = this.props;
     const { isLoading, players } = this.state;
     const colorByPlayer = getColorByPlayer(players);
+    if (isLoading) {
+      return <div>Loading...</div>;
+    }
     return (
       <Page>
         <div className={classes.leftPanel}>
-          <Game socketManager={socketManager} gameId={gameId} />
+          <Game
+            socketManager={socketManager}
+            gameId={gameId}
+            players={players}
+            currentPlayer={currentPlayer}
+          />
         </div>
         <div className={classes.rightPanel}>
           <div className={classes.chat}>

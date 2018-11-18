@@ -96,16 +96,28 @@ class SocketManager {
     this.socket.off('sendGame');
   }
 
-  sendCurrentPlayerPosition(data) {
-    this.socket.emit('sendCurrentPlayerPosition', data);
+  sendCurrentPlayerCoordinates(data) {
+    this.socket.emit('sendCurrentPlayerCoordinates', data);
   }
 
-  registerPlayerPositionReceived(callback) {
-    this.socket.on('sendPlayerPosition', callback);
+  registerPlayerCoordinatesReceived(callback) {
+    this.socket.on('sendPlayerCoordinates', callback);
   }
 
-  unregisterPlayerPositionReceived() {
-    this.socket.off('sendPlayerPosition');
+  unregisterPlayerCoordinatesReceived() {
+    this.socket.off('sendPlayerCoordinates');
+  }
+
+  sendCurrentPlayerStop(data) {
+    this.socket.emit('sendCurrentPlayerStop', data);
+  }
+
+  registerPlayerStopReceived(callback) {
+    this.socket.on('sendPlayerStop', callback);
+  }
+
+  unregisterPlayerStopReceived() {
+    this.socket.off('sendPlayerStop');
   }
 }
 
