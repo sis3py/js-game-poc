@@ -116,22 +116,49 @@ class GameScene extends Phaser.Scene {
 
   addPlayer(playerId, position, layer) {
     const initialCoordinates = getInitialCoordinates(position);
-    this.players[playerId].sprite = this.physics.add.sprite(initialCoordinates.x, initialCoordinates.y, 'all');
+    this.players[playerId].sprite = this.physics.add.sprite(
+      initialCoordinates.x,
+      initialCoordinates.y,
+      'all',
+    );
     this.physics.add.collider(this.players[playerId].sprite, layer);
     this.players[playerId].sprite.setCollideWorldBounds(true);
-    this.physics.add.collider(this.players[playerId].sprite, this.monster, this.monsterCatch, null, this);
-    // this.players[playerId].anims.play(direction);
+    this.physics.add.collider(
+      this.players[playerId].sprite,
+      this.monster,
+      this.monsterCatch,
+      null,
+      this,
+    );
+    this.players[playerId].nicknameSprite = this.add.text(
+      this.players[playerId].sprite.x - 50,
+      this.players[playerId].sprite.y - 50,
+      this.players[playerId].nickname,
+      {
+        fontFamily: 'Arial',
+        fontSize: '15px',
+        fontWeight: 'bold',
+        //backgroundColor: '#FFFFFF',
+        shadowStroke: true,
+        //shadowColor: '#FFFFFF',
+        stroke: '#000000',
+        strokeThickness: '2',
+        maxLines: 1,
+        color: this.colorByPlayer[playerId],
+      },
+    );
   }
 
   init(data) {
     // Init the data
     const {
-      socketManager, gameId, currentPlayer, players,
+      socketManager, gameId, currentPlayer, players, colorByPlayer,
     } = data;
     this.socketManager = socketManager;
     this.gameId = gameId;
     this.currentPlayer = currentPlayer;
     this.players = getPlayers(players);
+    this.colorByPlayer = colorByPlayer;
   }
 
   preload() {
@@ -193,7 +220,7 @@ class GameScene extends Phaser.Scene {
     this.monster = this.physics.add.sprite(300, 400, 'monster');
 
     // Create the players
-    Object.keys(this.players).forEach((id) => this.addPlayer(this.players[id].id, this.players[id].position, layer));
+    Object.keys(this.players).forEach(id => this.addPlayer(this.players[id].id, this.players[id].position, layer));
 
     //  Player physics properties. Give the little guy a slight bounce.
     // player.setBounce(0.5);
@@ -362,17 +389,19 @@ class GameScene extends Phaser.Scene {
   }
 
   updatePlayerCoordinates({ playerId, coordinatesData }) {
-    console.log(this);
-    console.log(this.players);
     this.players[playerId].sprite.x = coordinatesData.x;
     this.players[playerId].sprite.y = coordinatesData.y;
+    this.players[playerId].nicknameSprite.x = coordinatesData.x - 50;
+    this.players[playerId].nicknameSprite.y = coordinatesData.y - 50;
     this.players[playerId].sprite.anims.play(`player_${coordinatesData.direction}`, true);
   }
 
   stopPlayer({ playerId, coordinatesData }) {
     this.players[playerId].sprite.x = coordinatesData.x;
-    this.player[playerId].sprite.y = coordinatesData.y;
-    this.player[playerId].sprite.anims.play('player_immobile', true);
+    this.players[playerId].sprite.y = coordinatesData.y;
+    this.players[playerId].nicknameSprite.x = coordinatesData.x - 50;
+    this.players[playerId].nicknameSprite.y = coordinatesData.y - 50;
+    this.players[playerId].sprite.anims.play('player_immobile', true);
   }
 
   update() {
@@ -386,6 +415,8 @@ class GameScene extends Phaser.Scene {
       this.players[this.currentPlayer.id].sprite.setVelocityY(-160);
 
       this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.up}`, true);
+      this.players[this.currentPlayer.id].nicknameSprite.x = this.players[this.currentPlayer.id].sprite.x - 50;
+      this.players[this.currentPlayer.id].nicknameSprite.y = this.players[this.currentPlayer.id].sprite.y - 50;
       this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
         coordinatesData: {
@@ -398,6 +429,8 @@ class GameScene extends Phaser.Scene {
     } else if (this.cursors.down.isDown) {
       this.players[this.currentPlayer.id].sprite.setVelocityY(160);
       this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.down}`, true);
+      this.players[this.currentPlayer.id].nicknameSprite.x = this.players[this.currentPlayer.id].sprite.x - 50;
+      this.players[this.currentPlayer.id].nicknameSprite.y = this.players[this.currentPlayer.id].sprite.y - 50;
       this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
         coordinatesData: {
@@ -410,6 +443,8 @@ class GameScene extends Phaser.Scene {
     } else if (this.cursors.left.isDown) {
       this.players[this.currentPlayer.id].sprite.setVelocityX(-160);
       this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.left}`, true);
+      this.players[this.currentPlayer.id].nicknameSprite.x = this.players[this.currentPlayer.id].sprite.x - 50;
+      this.players[this.currentPlayer.id].nicknameSprite.y = this.players[this.currentPlayer.id].sprite.y - 50;
       this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
         coordinatesData: {
@@ -421,7 +456,12 @@ class GameScene extends Phaser.Scene {
       this.isMoving = true;
     } else if (this.cursors.right.isDown) {
       this.players[this.currentPlayer.id].sprite.setVelocityX(160);
-      this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.right}`, true);
+      this.players[this.currentPlayer.id].sprite.anims.play(
+        `player_${playerDirection.right}`,
+        true,
+      );
+      this.players[this.currentPlayer.id].nicknameSprite.x = this.players[this.currentPlayer.id].sprite.x - 50;
+      this.players[this.currentPlayer.id].nicknameSprite.y = this.players[this.currentPlayer.id].sprite.y - 50;
       this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
         coordinatesData: {
@@ -442,6 +482,8 @@ class GameScene extends Phaser.Scene {
       this.players[this.currentPlayer.id].sprite.body.velocity.x = 0;
       this.players[this.currentPlayer.id].sprite.body.velocity.y = 0;
       this.players[this.currentPlayer.id].sprite.anims.play('player_immobile', true);
+      this.players[this.currentPlayer.id].nicknameSprite.x = this.players[this.currentPlayer.id].sprite.x - 50;
+      this.players[this.currentPlayer.id].nicknameSprite.y = this.players[this.currentPlayer.id].sprite.y - 50;
       this.socketManager.sendCurrentPlayerStop({
         gameId: this.gameId,
         coordinatesData: {

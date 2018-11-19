@@ -52,6 +52,7 @@ class GamePage extends React.Component {
             gameId={gameId}
             players={players}
             currentPlayer={currentPlayer}
+            colorByPlayer={colorByPlayer}
           />
         </div>
         <div className={classes.rightPanel}>
