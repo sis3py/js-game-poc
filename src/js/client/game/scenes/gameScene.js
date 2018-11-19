@@ -1,5 +1,5 @@
 import EasyStar from 'easystarjs';
-import { direction as playerDirection } from '../../../enum/direction';
+import { direction as spriteDirection } from '../../../enum/direction';
 import { getInitialCoordinates, getPlayers } from '../logic/playerLogic';
 
 class GameScene extends Phaser.Scene {
@@ -17,19 +17,19 @@ class GameScene extends Phaser.Scene {
     this.stopPlayer = this.stopPlayer.bind(this);
   }
 
-  faceNextTile(tween) {
+  faceNextTile() {
     const isVerticalMovement = Math.abs(this.players[this.currentPlayer.id].sprite.y - this.monster.y) < 100
       || Math.abs(this.monster.y - this.players[this.currentPlayer.id].sprite.y) < 100;
     if (isVerticalMovement) {
       if (this.players[this.currentPlayer.id].sprite.x > this.monster.x) {
-        this.monster.anims.play('monsterRight', false);
+        this.monster.anims.play(`monster_${spriteDirection.right}`, false);
       } else {
-        this.monster.anims.play('monsterLeft', true);
+        this.monster.anims.play(`monster_${spriteDirection.left}`, true);
       }
     } else if (this.players[this.currentPlayer.id].sprite.y > this.monster.y) {
-      this.monster.anims.play('monsterDown', true);
+      this.monster.anims.play(`monster_${spriteDirection.down}`, true);
     } else {
-      this.monster.anims.play('monsterUp', true);
+      this.monster.anims.play(`monster_${spriteDirection.up}`, true);
     }
   }
 
@@ -273,7 +273,7 @@ class GameScene extends Phaser.Scene {
 
     // Player animations
     this.anims.create({
-      key: `player_${playerDirection.left}`,
+      key: `player_${spriteDirection.left}`,
       frames: this.anims.generateFrameNumbers('all', { start: 69, end: 71 }),
       frameRate: 10,
       repeat: -1,
@@ -286,21 +286,21 @@ class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: `player_${playerDirection.right}`,
+      key: `player_${spriteDirection.right}`,
       frames: this.anims.generateFrameNumbers('all', { start: 81, end: 83 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: `player_${playerDirection.up}`,
+      key: `player_${spriteDirection.up}`,
       frames: this.anims.generateFrameNumbers('all', { start: 93, end: 95 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: `player_${playerDirection.down}`,
+      key: `player_${spriteDirection.down}`,
       frames: this.anims.generateFrameNumbers('all', { start: 57, end: 59 }),
       frameRate: 10,
       repeat: -1,
@@ -308,7 +308,7 @@ class GameScene extends Phaser.Scene {
 
     // Monster animations
     this.anims.create({
-      key: 'monsterLeft',
+      key: `monster_${spriteDirection.left}`,
       frames: this.anims.generateFrameNumbers('monster', { start: 4, end: 7 }),
       frameRate: 10,
       repeat: -1,
@@ -321,14 +321,14 @@ class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: 'monsterRight',
+      key: `monster_${spriteDirection.right}`,
       frames: this.anims.generateFrameNumbers('monster', { start: 8, end: 11 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: 'monsterUp',
+      key: `monster_${spriteDirection.up}`,
       frames: this.anims.generateFrameNumbers('monster', {
         start: 12,
         end: 15,
@@ -338,7 +338,7 @@ class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: 'monsterDown',
+      key: `monster_${spriteDirection.down}`,
       frames: this.anims.generateFrameNumbers('monster', { start: 0, end: 3 }),
       frameRate: 10,
       repeat: -1,
@@ -414,13 +414,13 @@ class GameScene extends Phaser.Scene {
     if (this.cursors.up.isDown) {
       this.players[this.currentPlayer.id].sprite.setVelocityY(-160);
 
-      this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.up}`, true);
+      this.players[this.currentPlayer.id].sprite.anims.play(`player_${spriteDirection.up}`, true);
       this.players[this.currentPlayer.id].nicknameSprite.x = this.players[this.currentPlayer.id].sprite.x - 50;
       this.players[this.currentPlayer.id].nicknameSprite.y = this.players[this.currentPlayer.id].sprite.y - 50;
       this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
         coordinatesData: {
-          direction: playerDirection.up,
+          direction: spriteDirection.up,
           x: this.players[this.currentPlayer.id].sprite.x,
           y: this.players[this.currentPlayer.id].sprite.y,
         },
@@ -428,13 +428,13 @@ class GameScene extends Phaser.Scene {
       this.isMoving = true;
     } else if (this.cursors.down.isDown) {
       this.players[this.currentPlayer.id].sprite.setVelocityY(160);
-      this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.down}`, true);
+      this.players[this.currentPlayer.id].sprite.anims.play(`player_${spriteDirection.down}`, true);
       this.players[this.currentPlayer.id].nicknameSprite.x = this.players[this.currentPlayer.id].sprite.x - 50;
       this.players[this.currentPlayer.id].nicknameSprite.y = this.players[this.currentPlayer.id].sprite.y - 50;
       this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
         coordinatesData: {
-          direction: playerDirection.down,
+          direction: spriteDirection.down,
           x: this.players[this.currentPlayer.id].sprite.x,
           y: this.players[this.currentPlayer.id].sprite.y,
         },
@@ -442,13 +442,13 @@ class GameScene extends Phaser.Scene {
       this.isMoving = true;
     } else if (this.cursors.left.isDown) {
       this.players[this.currentPlayer.id].sprite.setVelocityX(-160);
-      this.players[this.currentPlayer.id].sprite.anims.play(`player_${playerDirection.left}`, true);
+      this.players[this.currentPlayer.id].sprite.anims.play(`player_${spriteDirection.left}`, true);
       this.players[this.currentPlayer.id].nicknameSprite.x = this.players[this.currentPlayer.id].sprite.x - 50;
       this.players[this.currentPlayer.id].nicknameSprite.y = this.players[this.currentPlayer.id].sprite.y - 50;
       this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
         coordinatesData: {
-          direction: playerDirection.left,
+          direction: spriteDirection.left,
           x: this.players[this.currentPlayer.id].sprite.x,
           y: this.players[this.currentPlayer.id].sprite.y,
         },
@@ -457,7 +457,7 @@ class GameScene extends Phaser.Scene {
     } else if (this.cursors.right.isDown) {
       this.players[this.currentPlayer.id].sprite.setVelocityX(160);
       this.players[this.currentPlayer.id].sprite.anims.play(
-        `player_${playerDirection.right}`,
+        `player_${spriteDirection.right}`,
         true,
       );
       this.players[this.currentPlayer.id].nicknameSprite.x = this.players[this.currentPlayer.id].sprite.x - 50;
@@ -465,7 +465,7 @@ class GameScene extends Phaser.Scene {
       this.socketManager.sendCurrentPlayerCoordinates({
         gameId: this.gameId,
         coordinatesData: {
-          direction: playerDirection.right,
+          direction: spriteDirection.right,
           x: this.players[this.currentPlayer.id].sprite.x,
           y: this.players[this.currentPlayer.id].sprite.y,
         },
