@@ -52,8 +52,8 @@ class SocketManager {
     this.socket.off('sendCurrentPlayer');
   }
 
-  updateCurrentPlayer(data) {
-    this.socket.emit('updateCurrentPlayer', data);
+  updateCurrentPlayerSettings(data) {
+    this.socket.emit('updateCurrentPlayerSettings', data);
   }
 
   sendChatMessage(roomId, chatMessage) {
@@ -118,6 +118,14 @@ class SocketManager {
 
   unregisterPlayerStopReceived() {
     this.socket.off('sendPlayerStop');
+  }
+
+  registerEnemyCoordinatesReceived(callback) {
+    this.socket.on('sendEnemyCoordinates', callback);
+  }
+
+  unregisterEnemyCoordinatesReceived() {
+    this.socket.off('sendEnemyCoordinates');
   }
 }
 

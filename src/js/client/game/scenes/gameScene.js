@@ -1,4 +1,3 @@
-import EasyStar from 'easystarjs';
 import { direction as spriteDirection } from '../../../enum/direction';
 import { getInitialCoordinates, getPlayers } from '../logic/playerLogic';
 
@@ -9,65 +8,31 @@ class GameScene extends Phaser.Scene {
     });
     this.socketManager = null;
     this.currentPlayer = null;
+    this.enemy = {};
     this.players = null;
     this.gameOver = false;
     this.isMoving = false;
 
     this.updatePlayerCoordinates = this.updatePlayerCoordinates.bind(this);
     this.stopPlayer = this.stopPlayer.bind(this);
+    this.updateEnemyCoordinates = this.updateEnemyCoordinates.bind(this);
   }
 
-  faceNextTile() {
-    const isVerticalMovement = Math.abs(this.players[this.currentPlayer.id].sprite.y - this.monster.y) < 100
-      || Math.abs(this.monster.y - this.players[this.currentPlayer.id].sprite.y) < 100;
-    if (isVerticalMovement) {
-      if (this.players[this.currentPlayer.id].sprite.x > this.monster.x) {
-        this.monster.anims.play(`monster_${spriteDirection.right}`, false);
-      } else {
-        this.monster.anims.play(`monster_${spriteDirection.left}`, true);
-      }
-    } else if (this.players[this.currentPlayer.id].sprite.y > this.monster.y) {
-      this.monster.anims.play(`monster_${spriteDirection.down}`, true);
-    } else {
-      this.monster.anims.play(`monster_${spriteDirection.up}`, true);
-    }
-  }
-
-  calculAIAndMove() {
-    const that = this;
-    // Monster go to player
-    this.finder.findPath(
-      Math.floor(this.monster.x / 32),
-      Math.floor(this.monster.y / 32),
-      Math.floor(this.players[this.currentPlayer.id].sprite.x / 32),
-      Math.floor(this.players[this.currentPlayer.id].sprite.y / 32),
-      (path) => {
-        if (path === null) {
-          // console.warn("Path was not found.");
-        } else {
-          // console.log(path);
-          // Move character
-          // Sets up a list of tweens, one for each tile to walk, that will be chained by the timeline
-          const tweens = [];
-          for (let i = 0; i < path.length - 1; i++) {
-            const ex = path[i + 1].x;
-            const ey = path[i + 1].y;
-            tweens.push({
-              targets: that.monster,
-              x: { value: ex * 32, duration: 200 },
-              y: { value: ey * 32, duration: 200 },
-              onStart: that.faceNextTile.bind(that),
-            });
-          }
-          that.tweens.killAll();
-          that.tweens.timeline({
-            tweens,
-          });
-        }
-      },
-    );
-    this.finder.calculate();
-  }
+  // faceNextTile() {
+  //   const isVerticalMovement = Math.abs(this.players[this.currentPlayer.id].sprite.y - this.enemy.y) < 100
+  //     || Math.abs(this.enemy.y - this.players[this.currentPlayer.id].sprite.y) < 100;
+  //   if (isVerticalMovement) {
+  //     if (this.players[this.currentPlayer.id].sprite.x > this.enemy.x) {
+  //       this.enemy.anims.play(`monster_${spriteDirection.right}`, false);
+  //     } else {
+  //       this.enemy.anims.play(`monster_${spriteDirection.left}`, true);
+  //     }
+  //   } else if (this.players[this.currentPlayer.id].sprite.y > this.enemy.y) {
+  //     this.enemy.anims.play(`monster_${spriteDirection.down}`, true);
+  //   } else {
+  //     this.enemy.anims.play(`monster_${spriteDirection.up}`, true);
+  //   }
+  // }
 
   // collectStar(player, star) {
   //   star.disableBody(true, true);
@@ -92,14 +57,14 @@ class GameScene extends Phaser.Scene {
   //   }
   // }
 
-  monsterCatch() {
+  enemyCatch() {
     this.physics.pause();
 
     this.players[this.currentPlayer.id].sprite.setTint(0xff0000);
 
-    this.players[this.currentPlayer.id].sprite.anims.play('playerImmobile');
-    this.monster.anims.play('monsterImmobile');
-
+    this.players[this.currentPlayer.id].sprite.anims.play('player_immobile');
+    this.enemy.sprite.anims.play('enemy_immobile');
+    this.enemy.sprite.setVelocity(0);
     this.gameOver = true;
 
     this.add.text(30, 30, 'Gamer over', {
@@ -107,11 +72,6 @@ class GameScene extends Phaser.Scene {
       fontWeight: 'bold',
       fill: '#FF0000',
     });
-  }
-
-  getTileID(map, x, y) {
-    const tile = map.getTileAt(x, y);
-    return tile.index;
   }
 
   addPlayer(playerId, position, layer) {
@@ -125,8 +85,8 @@ class GameScene extends Phaser.Scene {
     this.players[playerId].sprite.setCollideWorldBounds(true);
     this.physics.add.collider(
       this.players[playerId].sprite,
-      this.monster,
-      this.monsterCatch,
+      this.enemy.sprite,
+      this.enemyCatch,
       null,
       this,
     );
@@ -138,9 +98,9 @@ class GameScene extends Phaser.Scene {
         fontFamily: 'Arial',
         fontSize: '15px',
         fontWeight: 'bold',
-        //backgroundColor: '#FFFFFF',
+        // backgroundColor: '#FFFFFF',
         shadowStroke: true,
-        //shadowColor: '#FFFFFF',
+        // shadowColor: '#FFFFFF',
         stroke: '#000000',
         strokeThickness: '2',
         maxLines: 1,
@@ -175,8 +135,8 @@ class GameScene extends Phaser.Scene {
       frameHeight: 48,
     });
 
-    // Monster sprite sheet
-    this.load.spritesheet('monster', '/assets/spritesheets/armored_monster.png', {
+    // Enemy sprite sheet
+    this.load.spritesheet('enemy', '/assets/spritesheets/armored_monster.png', {
       frameWidth: 43,
       frameHeight: 64,
     });
@@ -193,44 +153,19 @@ class GameScene extends Phaser.Scene {
     // index (0 in this case).
     const layer = map.createStaticLayer(0, tiles, 0, 0);
 
-    // Set colliding tiles before converting the layer to Matter bodies!
-    layer.setCollisionByProperty({ collides: true });
+    // Configure the non walkable tiles
+    // layer.setCollisionByProperty({ collides: true }); // doesnt work anymore
+    // layer.setCollisionBetween(16, 52); // Disabled for testing purpose
 
-    // Convert the layer. Any colliding tiles will be given a Matter body. If a tile has collision
-    // shapes from Tiled, these will be loaded. If not, a default rectangle body will be used. The
-    // body will be accessible via tile.physics.matterBody.
-    // this.arcade.world.convertTilemapLayer(layer);
-
-    //  A simple background for our game
-    // this.add.image(0, 0, 'sky').setScale(1500,1500).setOrigin(0);;
-
-    //  The platforms group contains the ground and the 2 ledges we can jump on
-    // platforms = this.physics.add.staticGroup();
-
-    //  Here we create the ground.
-    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    // platforms.create(3000, 10, 'ground').setScale(10).refreshBody();
-
-    //  Now let's create some ledges
-    // platforms.create(20, 10, 'ground');
-    // platforms.create(50, 270, 'ground');
-    // platforms.create(800, 250, 'ground');
-
-    // Create the monster
-    this.monster = this.physics.add.sprite(300, 400, 'monster');
+    // Create the enemy
+    this.enemy.sprite = this.physics.add.sprite(300, 500, 'enemy');
 
     // Create the players
     Object.keys(this.players).forEach(id => this.addPlayer(this.players[id].id, this.players[id].position, layer));
 
-    //  Player physics properties. Give the little guy a slight bounce.
-    // player.setBounce(0.5);
+    this.enemy.sprite.setCollideWorldBounds(true);
 
-    this.monster.setCollideWorldBounds(true);
-
-    this.physics.add.collider(this.monster, layer);
-
-    // this.physics.world.setBounds(0, 0, 1500, 1500);
-    // this.cameras.main.setBounds(0, 0, 1500, 1500);
+    this.physics.add.collider(this.enemy.sprite, layer);
 
     // map size
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -239,37 +174,6 @@ class GameScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.players[this.currentPlayer.id].sprite);
 
     this.cameras.main.followOffset.set(0, 0);
-
-    // Pathfinding
-    this.finder = new EasyStar.js();
-
-    const grid = [];
-    for (let y = 0; y < map.height; y++) {
-      const col = [];
-      for (let x = 0; x < map.width; x++) {
-        // In each cell we store the ID of the tile, which corresponds
-        // to its index in the tileset of the map ("ID" field in Tiled)
-        col.push(this.getTileID(map, x, y));
-      }
-      grid.push(col);
-    }
-    this.finder.setGrid(grid);
-
-    const tileset = map.tilesets[0];
-    const properties = tileset.tileProperties;
-    const acceptableTiles = [];
-
-    for (let i = tileset.firstgid - 1; i < tiles.total; i++) {
-      // firstgid and total are fields from Tiled that indicate the range of IDs that the tiles can take in that tileset
-      if (!properties.hasOwnProperty(i)) {
-        // If there is no property indicated at all, it means it's a walkable tile
-        acceptableTiles.push(i + 1);
-        continue;
-      }
-      if (!properties[i].collides) acceptableTiles.push(i + 1);
-      // if(properties[i].cost) Game.finder.setTileCost(i+1, properties[i].cost); // If there is a cost attached to the tile, let's register it
-    }
-    this.finder.setAcceptableTiles(acceptableTiles);
 
     // Player animations
     this.anims.create({
@@ -308,28 +212,28 @@ class GameScene extends Phaser.Scene {
 
     // Monster animations
     this.anims.create({
-      key: `monster_${spriteDirection.left}`,
-      frames: this.anims.generateFrameNumbers('monster', { start: 4, end: 7 }),
+      key: `enemy_${spriteDirection.left}`,
+      frames: this.anims.generateFrameNumbers('enemy', { start: 4, end: 7 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: 'monsterImmobile',
-      frames: [{ key: 'monster', frame: 2 }],
+      key: 'enemy_immobile',
+      frames: [{ key: 'enemy', frame: 2 }],
       frameRate: 20,
     });
 
     this.anims.create({
-      key: `monster_${spriteDirection.right}`,
-      frames: this.anims.generateFrameNumbers('monster', { start: 8, end: 11 }),
+      key: `enemy_${spriteDirection.right}`,
+      frames: this.anims.generateFrameNumbers('enemy', { start: 8, end: 11 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: `monster_${spriteDirection.up}`,
-      frames: this.anims.generateFrameNumbers('monster', {
+      key: `enemy_${spriteDirection.up}`,
+      frames: this.anims.generateFrameNumbers('enemy', {
         start: 12,
         end: 15,
       }),
@@ -338,8 +242,8 @@ class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: `monster_${spriteDirection.down}`,
-      frames: this.anims.generateFrameNumbers('monster', { start: 0, end: 3 }),
+      key: `enemy_${spriteDirection.down}`,
+      frames: this.anims.generateFrameNumbers('enemy', { start: 0, end: 3 }),
       frameRate: 10,
       repeat: -1,
     });
@@ -377,13 +281,15 @@ class GameScene extends Phaser.Scene {
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     // this.physics.add.overlap(player, stars, collectStar, null, this);
 
-    // const recalculAIEvent = this.time.addEvent({
-    //   delay: 1000,
-    //   callback: this.calculAIAndMove,
+    // let test = 300;
+    // this.time.addEvent({
+    //   delay: 100,
+    //   callback: () => this.updateEnemyCoordinates({ x: test += 8, y: 400, direction: 4 }),
     //   callbackScope: this,
     //   loop: true,
     // });
 
+    this.socketManager.registerEnemyCoordinatesReceived(this.updateEnemyCoordinates);
     this.socketManager.registerPlayerCoordinatesReceived(this.updatePlayerCoordinates);
     this.socketManager.registerPlayerStopReceived(this.stopPlayer);
   }
@@ -402,6 +308,43 @@ class GameScene extends Phaser.Scene {
     this.players[playerId].nicknameSprite.x = coordinatesData.x - 50;
     this.players[playerId].nicknameSprite.y = coordinatesData.y - 50;
     this.players[playerId].sprite.anims.play('player_immobile', true);
+  }
+
+  updateEnemyCoordinates({ x, y, direction }) {
+    // TECH 1
+    this.enemy.sprite.setVelocity(0);
+    // switch (direction) {
+    //   case spriteDirection.down:
+    //     this.enemy.sprite.setVelocityY(160);
+    //     break;
+    //   case spriteDirection.up:
+    //     this.enemy.sprite.setVelocityY(-160);
+    //     break;
+    //   case spriteDirection.right:
+    //     this.enemy.sprite.setVelocityX(160);
+    //     break;
+    //   case spriteDirection.left:
+    //     this.enemy.sprite.setVelocityX(-160);
+    //     break;
+    //   default:
+    //     throw new Error('Error with the given direction');
+    // }
+
+    // TECH 2
+    // this.enemy.sprite.x = x;
+    // this.enemy.sprite.y = y;
+
+    // TECH 3
+    this.tweens.add({
+      targets: this.enemy.sprite,
+      props: {
+          x: { value: x, ease: 'Power1' },
+          y: { value: y, ease: 'Power1' },
+      },
+      duration: 300,
+  });
+
+    this.enemy.sprite.anims.play(`enemy_${direction}`, true);
   }
 
   update() {

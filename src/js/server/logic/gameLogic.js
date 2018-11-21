@@ -2,6 +2,7 @@ const { gameStatus } = require('../../enum/gameStatus');
 const { playerStatus } = require('../../enum/playerStatus');
 const { guid } = require('../../helper/guid');
 const { games, players } = require('../database/data');
+const { initEnemy } = require('../logic/enemyLogic');
 
 // Create a game
 const createGame = (gameName, creatorId) => {
@@ -15,6 +16,7 @@ const createGame = (gameName, creatorId) => {
     players: [creatorId],
     nbPlayers: 1,
     status: gameStatus.created,
+    enemy: { coordinates: { x: 300, y: 500 } },
   };
 
   return gameId;
@@ -58,6 +60,11 @@ const getGame = gameId => ({
   players: games[gameId].players.map(id => players[id]),
 });
 
+const initGame = (io, gameId) => {
+  // Initialize the enemy
+  initEnemy(io, getGame(gameId));
+};
+
 module.exports = {
   createGame,
   addPlayerToGame,
@@ -66,4 +73,5 @@ module.exports = {
   getGame,
   updateGameStatus,
   isGameReadyToStart,
+  initGame,
 };

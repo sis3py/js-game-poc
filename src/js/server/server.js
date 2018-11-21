@@ -9,9 +9,16 @@ const {
   getGame,
   updateGameStatus,
   isGameReadyToStart,
+  initGame,
 } = require('./logic/gameLogic');
 const {
-  addPlayer, removePlayer, getPlayer, updatePlayer,
+  addPlayer,
+  removePlayer,
+  getPlayer,
+  updatePlayerSettings,
+  updatePlayerGameData,
+  updatePlayerStatus,
+  updatePlayerCoordinates,
 } = require('./logic/playerLogic');
 const { buildChatMessage, buildChatNotification } = require('./logic/chatLogic');
 const { gameStatus } = require('../enum/gameStatus');
@@ -31,10 +38,8 @@ io.on('connection', (socket) => {
     // Create the game and get the id
     const gameId = createGame(gameName, socket.id);
 
-    // Update the player data :
-    // - set the game id
-    // - set the player status to in lobby
-    updatePlayer(socket.id, { game: { id: gameId }, status: playerStatus.inLobbyNotReady });
+    // Update the player
+    updatePlayerGameData(socket.id, gameId, playerStatus.inLobbyNotReady);
 
     // Get the player
     const player = getPlayer(socket.id);
@@ -53,10 +58,8 @@ io.on('connection', (socket) => {
     // Add the current player to the game player list
     addPlayerToGame(gameId, socket.id);
 
-    // Update the player data :
-    // - set the game id
-    // - set the player status to in lobby
-    updatePlayer(socket.id, { game: { id: gameId }, status: playerStatus.inLobbyNotReady });
+    // Update the player :
+    updatePlayerGameData(socket.id, gameId, playerStatus.inLobbyNotReady);
 
     // Get the player
     const player = getPlayer(socket.id);
@@ -80,7 +83,7 @@ io.on('connection', (socket) => {
 
     // - unset the game id
     // - set the player status to in online
-    updatePlayer(socket.id, { game: { id: undefined }, status: playerStatus.online });
+    updatePlayerGameData(socket.id, undefined, playerStatus.online);
 
     // Get the player
     const player = getPlayer(socket.id);
@@ -111,8 +114,8 @@ io.on('connection', (socket) => {
     socket.emit('sendCurrentPlayer', getPlayer(socket.id));
   });
 
-  socket.on('updateCurrentPlayer', (data) => {
-    updatePlayer(socket.id, data);
+  socket.on('updateCurrentPlayerSettings', ({ nickname }) => {
+    updatePlayerSettings(socket.id, nickname);
     socket.emit('sendCurrentPlayer', getPlayer(socket.id));
   });
 
@@ -130,7 +133,7 @@ io.on('connection', (socket) => {
 
   socket.on('setPlayerReady', (gameId) => {
     // Set the player status to lobby ready
-    updatePlayer(socket.id, { status: playerStatus.inLobbyReady });
+    updatePlayerStatus(socket.id, playerStatus.inLobbyReady);
 
     // Get the player
     const player = getPlayer(socket.id);
@@ -141,6 +144,7 @@ io.on('connection', (socket) => {
     // Start the game if all players are ready
     if (isGameReadyToStart(gameId)) {
       updateGameStatus(gameId, gameStatus.started);
+      initGame(io, gameId);
     }
 
     // Send the new data related to the game
@@ -149,13 +153,12 @@ io.on('connection', (socket) => {
 
   socket.on('sendCurrentPlayerCoordinates', ({ gameId, coordinatesData }) => {
     // Update the current player coordinates
-    updatePlayer(socket.id, {
-      coordinates: {
-        x: coordinatesData.x,
-        y: coordinatesData.y,
-        direction: coordinatesData.direction,
-      },
-    });
+    updatePlayerCoordinates(
+      socket.id,
+      coordinatesData.x,
+      coordinatesData.y,
+      coordinatesData.direction,
+    );
 
     // Send the current player new coordinates to the other players
     socket.to(gameId).emit('sendPlayerCoordinates', { playerId: socket.id, coordinatesData });
@@ -164,6 +167,16 @@ io.on('connection', (socket) => {
   socket.on('sendCurrentPlayerStop', ({ gameId, coordinatesData }) => {
     // Send the current player stop action to the other players
     socket.to(gameId).emit('sendPlayerStop', { playerId: socket.id, coordinatesData });
+  });
+
+  socket.on('sendPlayerCoordinates', ({ coordinatesData }) => {
+    // Update the current player coordinates
+    updatePlayerCoordinates(
+      socket.id,
+      coordinatesData.x,
+      coordinatesData.y,
+      coordinatesData.direction,
+    );
   });
 
   socket.on('disconnect', () => {

@@ -20,14 +20,33 @@ const removePlayer = (playerId) => {
 
 const getPlayer = playerId => players[playerId];
 
-const updatePlayer = (playerId, data) => {
-  // Update the player data
-  players[playerId] = { ...players[playerId], ...data };
+const updatePlayerSettings = (playerId, nickname) => {
+  players[playerId].nickname = nickname;
+};
+
+const updatePlayerGameData = (playerId, gameId, status) => {
+  players[playerId].game = { id: gameId };
+  players[playerId].status = status;
+};
+
+const updatePlayerStatus = (playerId, status) => {
+  players[playerId].status = status;
+};
+
+const updatePlayerCoordinates = (playerId, x, y, direction) => {
+  players[playerId].coordinates = {
+    x,
+    y,
+    direction,
+  };
 };
 
 module.exports = {
   addPlayer,
   removePlayer,
   getPlayer,
-  updatePlayer,
+  updatePlayerSettings,
+  updatePlayerGameData,
+  updatePlayerStatus,
+  updatePlayerCoordinates,
 };

@@ -22,8 +22,8 @@ class OptionsPage extends Component {
 
   saveChanges() {
     const { nickname } = this.state;
-    const { socketManager, currentPlayer } = this.props;
-    socketManager.updateCurrentPlayer({ ...currentPlayer, nickname });
+    const { socketManager } = this.props;
+    socketManager.updateCurrentPlayerSettings({ nickname });
   }
 
   render() {

@@ -1,5 +1,5 @@
 export const player1X = 100;
-export const player1Y = 100;
+export const player1Y = 300;
 
 export const player2X = 200;
 export const player2Y = 100;

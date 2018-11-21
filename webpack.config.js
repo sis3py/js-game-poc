@@ -87,7 +87,7 @@ module.exports = {
     }),
     new CopyWebpackPlugin([
       { from: 'src/js/client/images', to: 'assets/images' },
-      { from: 'src/js/client/game/assets', to: 'assets' },
+      { from: 'src/js/assets', to: 'assets' },
     ]),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
