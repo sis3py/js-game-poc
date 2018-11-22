@@ -155,7 +155,7 @@ class GameScene extends Phaser.Scene {
 
     // Configure the non walkable tiles
     // layer.setCollisionByProperty({ collides: true }); // doesnt work anymore
-    // layer.setCollisionBetween(16, 52); // Disabled for testing purpose
+    layer.setCollisionBetween(16, 52); // Disabled for testing purpose
 
     // Create the enemy
     this.enemy.sprite = this.physics.add.sprite(300, 500, 'enemy');
@@ -338,10 +338,10 @@ class GameScene extends Phaser.Scene {
     this.tweens.add({
       targets: this.enemy.sprite,
       props: {
-          x: { value: x, ease: 'Power1' },
-          y: { value: y, ease: 'Power1' },
+          x: { value: x },
+          y: { value: y },
       },
-      duration: 300,
+      duration: 200,
   });
 
     this.enemy.sprite.anims.play(`enemy_${direction}`, true);

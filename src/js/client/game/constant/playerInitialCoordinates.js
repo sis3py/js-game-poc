@@ -1,4 +1,4 @@
-export const player1X = 100;
+export const player1X = 500;
 export const player1Y = 300;
 
 export const player2X = 200;

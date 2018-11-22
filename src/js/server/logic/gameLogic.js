@@ -1,7 +1,9 @@
+const easystarjs = require('easystarjs');
 const { gameStatus } = require('../../enum/gameStatus');
 const { playerStatus } = require('../../enum/playerStatus');
 const { guid } = require('../../helper/guid');
 const { games, players } = require('../database/data');
+const { initMap, getGrid } = require('../logic/mapLogic');
 const { initEnemy } = require('../logic/enemyLogic');
 
 // Create a game
@@ -61,8 +63,23 @@ const getGame = gameId => ({
 });
 
 const initGame = (io, gameId) => {
+  // Init the map
+  const map = initMap();
+
+  // Get a 2D grid from the map
+  const grid = getGrid(map);
+
+  // Initialize the pathfinding library
+  const easystar = new easystarjs.js();
+
+  // Feed the grid
+  easystar.setGrid(grid);
+
+  // Limit the path to the walkable tiles only
+  easystar.setAcceptableTiles([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+
   // Initialize the enemy
-  initEnemy(io, getGame(gameId));
+  initEnemy(getGame(gameId), io, easystar);
 };
 
 module.exports = {

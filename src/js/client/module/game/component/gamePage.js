@@ -45,7 +45,7 @@ class GamePage extends React.Component {
       return <div>Loading...</div>;
     }
     return (
-      <Page>
+      <Page isFullScreen>
         <div className={classes.leftPanel}>
           <Game
             socketManager={socketManager}

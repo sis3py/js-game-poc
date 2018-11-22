@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -35,11 +34,6 @@ class OptionsPage extends Component {
           <TextField type="text" label="Nickname" onChange={this.updateNickName} value={nickname} />
           <Button size="large" color="primary" variant="contained" onClick={this.saveChanges}>
             Apply
-          </Button>
-        </div>
-        <div>
-          <Button component={Link} to="/" size="large" color="secondary" variant="contained">
-            Back
           </Button>
         </div>
       </Page>

@@ -2,6 +2,8 @@ export const pageStyle = {
   page: {
     display: 'flex',
     justifyContent: 'center',
+  },
+  pageMargin: {
     marginTop: 40,
     marginLeft: 40,
     marginRight: 40,

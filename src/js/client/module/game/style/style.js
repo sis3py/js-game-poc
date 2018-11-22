@@ -1,9 +1,9 @@
 export const gameStyle = {
   leftPanel: {
-    width: '60%',
+    width: '70%',
   },
   rightPanel: {
-    width: '40%',
+    width: '30%',
   },
   chat: {
     fontFamily: ['Roboto', 'Helvetica', 'Arial', 'sans-serif'],

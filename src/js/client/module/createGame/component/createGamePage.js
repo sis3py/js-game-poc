@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -65,11 +65,6 @@ class CreateGamePage extends React.Component {
           <Grid item xs={6}>
             <Button size="large" color="primary" variant="contained" onClick={this.createGame}>
               Create
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Button component={Link} to="/" size="large" color="secondary" variant="contained">
-              Back
             </Button>
           </Grid>
         </Grid>
