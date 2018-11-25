@@ -19,42 +19,70 @@ const getDirection = (currentX, currentY, newX, newY) => {
   }
 };
 
+// Get an array of coordinates representing the path
+// between starting coordinates and destination coordinates
+const findPath = ({
+  easystar, startX, startY, destinationX, destinationY,
+}) => new Promise((resolve, reject) => {
+  easystar.findPath(
+    Math.floor(startX / 32),
+    Math.floor(startY / 32),
+    Math.floor(destinationX / 32),
+    Math.floor(destinationY / 32),
+    path => (path === null ? reject() : resolve(path)),
+  );
+});
+
+const getEnemyPathToPlayer = (easystar, enemy, player) => findPath({
+  easystar,
+  startX: enemy.coordinates.x,
+  startY: enemy.coordinates.y,
+  destinationX: player.coordinates.x,
+  destinationY: player.coordinates.y,
+});
+
+const getNextCoordinates = (path) => {
+  const x = path[1].x * 32;
+  const y = path[1].y * 32;
+  return { x, y };
+};
+
+// Move the enemy based on the given coordinates
+const moveEnemy = (io, gameId, enemy, { x, y }) => {
+  // Get the enemy direction depending on the move
+  const direction = getDirection(enemy.coordinates.x, enemy.coordinates.y, x, y);
+
+  // Send the new coordinates and direction
+  io.in(gameId).emit('sendEnemyCoordinates', {
+    x,
+    y,
+    direction,
+  });
+
+  // Update the enemy coordinates
+  enemy.coordinates.x = x;
+  enemy.coordinates.y = y;
+};
+
+const calculateClosestPathIndex = (paths) => {
+  // Get the smallest path because the smallest a path is, the closer a player is from the enemy
+  const Math.min(...arr)
+}
+
+const getClosestPlayer = (easystar, enemy, players) => {
+  const promises = players.map(player => getEnemyPathToPlayer(easystar, enemy, player));
+  Promise.all(promises)
+    .then(paths => players[calculateClosestPathIndex(paths)])
+    .catch(() => console.log('One of the path cannot be found between the enemy and the players'));
+};
+
 const initEnemy = (game, io, easystar) => {
   // Enemy behavior calculation loop
   setInterval(() => {
-    easystar.findPath(
-      Math.floor(game.enemy.coordinates.x / 32),
-      Math.floor(game.enemy.coordinates.y / 32),
-      Math.floor(game.players[0].coordinates.x / 32),
-      Math.floor(game.players[0].coordinates.y / 32),
-      (path) => {
-        if (path === null) {
-          console.log('Unable to find a path between the enemy and the players');
-        }
-
-        if (path) {
-          const nextX = path[1].x * 32;
-          const nextY = path[1].y * 32;
-          const direction = getDirection(
-            game.enemy.coordinates.x,
-            game.enemy.coordinates.y,
-            nextX,
-            nextY,
-          );
-
-          // Send the new coordinates and direction
-          io.in(game.id).emit('sendEnemyCoordinates', {
-            x: nextX,
-            y: nextY,
-            direction,
-          });
-
-          // Update the enemy coordinates
-          game.enemy.coordinates.x = nextX;
-          game.enemy.coordinates.y = nextY;
-        }
-      },
-    );
+    getClosestPlayer(easystar, game.enemy, game.players);
+    getEnemyPathToPlayer(easystar, game.enemy, game.players[0])
+      .then(path => moveEnemy(io, game.id, game.enemy, getNextCoordinates(path)))
+      .catch(() => console.log('Unable to find a path between the enemy and the players'));
     easystar.calculate();
   }, 200);
 };
@@ -62,34 +90,6 @@ const initEnemy = (game, io, easystar) => {
 // TODO
 // 1 - LOAD JSON MAP AND HANDLE GENERIC SIZE
 // 2 - FIND HOW TO MAKE WALKABLE TILES ONLY WORKING
-
-// const grid = [];
-// for (let y = 0; y < map.height; y++) {
-//   const col = [];
-//   for (let x = 0; x < map.width; x++) {
-//     // In each cell we store the ID of the tile, which corresponds
-//     // to its index in the tileset of the map ("ID" field in Tiled)
-//     col.push(this.getTileID(map, x, y));
-//   }
-//   grid.push(col);
-// }
-// this.finder.setGrid(grid);
-
-// const tileset = map.tilesets[0];
-// const properties = tileset.tileProperties;
-// const acceptableTiles = [];
-
-// for (let i = tileset.firstgid - 1; i < tiles.total; i++) {
-//   // firstgid and total are fields from Tiled that indicate the range of IDs that the tiles can take in that tileset
-//   if (!properties.hasOwnProperty(i)) {
-//     // If there is no property indicated at all, it means it's a walkable tile
-//     acceptableTiles.push(i + 1);
-//     continue;
-//   }
-//   if (!properties[i].collides) acceptableTiles.push(i + 1);
-//   // if(properties[i].cost) Game.finder.setTileCost(i+1, properties[i].cost); // If there is a cost attached to the tile, let's register it
-// }
-// this.finder.setAcceptableTiles(acceptableTiles);
 
 module.exports = {
   initEnemy,

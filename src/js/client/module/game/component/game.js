@@ -13,8 +13,8 @@ class Game extends Component {
   componentDidMount() {
     const config = {
       type: Phaser.AUTO,
-      // width: 500,
-      // height: 500,
+      width: 1050,
+      height: 685,
       physics: {
         default: 'arcade',
         arcade: {

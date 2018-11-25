@@ -3,6 +3,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { gameStyle } from '../style/style';
 import Page from '../../common/component/page';
 import Game from './game';
+import PlayerUIGrid from './playerUIGrid';
 import Chat from '../../chat/component/chat';
 import { getColorByPlayer } from '../../common/logic/commonLogic';
 
@@ -56,6 +57,15 @@ class GamePage extends React.Component {
           />
         </div>
         <div className={classes.rightPanel}>
+          <div className={classes.playerUI}>
+            <PlayerUIGrid
+              socketManager={socketManager}
+              gameId={gameId}
+              players={players}
+              currentPlayer={currentPlayer}
+              colorByPlayer={colorByPlayer}
+            />
+          </div>
           <div className={classes.chat}>
             <Chat socketManager={socketManager} roomId={gameId} colorByPlayer={colorByPlayer} />
           </div>

@@ -3,10 +3,15 @@ export const pageStyle = {
     display: 'flex',
     justifyContent: 'center',
   },
-  pageMargin: {
+  standardMargin: {
     marginTop: 40,
     marginLeft: 40,
     marginRight: 40,
+  },
+  fullScreenMargin: {
+    marginTop: 10,
+    marginLeft: 10,
+    marginRight: 10,
   },
 };
 

@@ -250,6 +250,7 @@ class GameScene extends Phaser.Scene {
 
     //  Input Events
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.input.keyboard.removeKey('SPACE'); // Unbind the space bar because it is used by the chat
 
     //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
     // stars = this.physics.add.group({
@@ -352,6 +353,10 @@ class GameScene extends Phaser.Scene {
 
     if (this.gameOver) {
       return;
+    }
+
+    if (this.cursors.space.isDown) {
+      console.log("SPACE");
     }
 
     if (this.cursors.up.isDown) {
