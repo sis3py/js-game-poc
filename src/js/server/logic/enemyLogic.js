@@ -1,4 +1,6 @@
 const { direction: spriteDirection } = require('../../enum/direction');
+const { getSmallSizeChildIndexes } = require('../../helper/array');
+const { distanceBetweenTwoPoints } = require('../../helper/calculation');
 
 // Get the direction of the enemy based on the coordinates before and after the move
 const getDirection = (currentX, currentY, newX, newY) => {
@@ -64,15 +66,31 @@ const moveEnemy = (io, gameId, enemy, { x, y }) => {
   enemy.coordinates.y = y;
 };
 
-const calculateClosestPathIndex = (paths) => {
+const calculateClosestPathIndex = (paths, enemy) => {
   // Get the smallest path because the smallest a path is, the closer a player is from the enemy
-  const Math.min(...arr)
-}
+  const smallestPathIndexes = getSmallSizeChildIndexes(paths);
+  const smallestPaths = smallestPathIndexes.map(index => paths[index]);
+
+  // If the smallest path is single then this is the closest path
+  if (smallestPaths.length === 1) {
+    return smallestPaths[0];
+  }
+  // Otherwise we have to calculate the distance between the enemy and the last position of each path
+  // and choose the lowest distance
+  const distances = smallestPaths.map(path => distanceBetweenTwoPoints(
+    enemy.coordinates.x,
+    enemy.coordinates.y,
+    path[path.length - 1].x,
+    path[path.length - 1].y,
+  ));
+
+  distanceBetweenTwoPoints;
+};
 
 const getClosestPlayer = (easystar, enemy, players) => {
   const promises = players.map(player => getEnemyPathToPlayer(easystar, enemy, player));
   Promise.all(promises)
-    .then(paths => players[calculateClosestPathIndex(paths)])
+    .then(paths => players[calculateClosestPathIndex(paths, enemy)])
     .catch(() => console.log('One of the path cannot be found between the enemy and the players'));
 };
 
