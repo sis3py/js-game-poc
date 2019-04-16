@@ -15,6 +15,10 @@ class Game extends Component {
       type: Phaser.AUTO,
       width: 1050,
       height: 685,
+      resolution: 2, // High resolution if > 1
+      // pixelArt: true,
+      // zoom: 4,
+      // antialias: true,
       physics: {
         default: 'arcade',
         arcade: {

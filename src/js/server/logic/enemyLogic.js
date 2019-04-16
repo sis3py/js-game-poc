@@ -69,22 +69,19 @@ const moveEnemy = (io, gameId, enemy, { x, y }) => {
 const calculateClosestPathIndex = (paths, enemy) => {
   // Get the smallest path because the smallest a path is, the closer a player is from the enemy
   const smallestPathIndexes = getSmallSizeChildIndexes(paths);
-  const smallestPaths = smallestPathIndexes.map(index => paths[index]);
 
   // If the smallest path is single then this is the closest path
-  if (smallestPaths.length === 1) {
-    return smallestPaths[0];
+  if (smallestPathIndexes.length === 1) {
+    return smallestPathIndexes[0];
   }
   // Otherwise we have to calculate the distance between the enemy and the last position of each path
   // and choose the lowest distance
-  const distances = smallestPaths.map(path => distanceBetweenTwoPoints(
+  const distances = smallestPathIndexes.map(path => distanceBetweenTwoPoints(
     enemy.coordinates.x,
     enemy.coordinates.y,
     path[path.length - 1].x,
     path[path.length - 1].y,
   ));
-
-  distanceBetweenTwoPoints;
 };
 
 const getClosestPlayer = (easystar, enemy, players) => {

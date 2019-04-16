@@ -2,7 +2,7 @@ const fs = require('fs');
 
 const initMap = () => {
   // Parse the JSON tilemap
-  const map = JSON.parse(fs.readFileSync('dist/assets/tilemaps/maps/main.json', 'utf8'));
+  const map = JSON.parse(fs.readFileSync('dist/assets/tilemaps/main.json', 'utf8'));
   return map;
 };
 

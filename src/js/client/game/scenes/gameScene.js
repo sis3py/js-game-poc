@@ -79,8 +79,13 @@ class GameScene extends Phaser.Scene {
     this.players[playerId].sprite = this.physics.add.sprite(
       initialCoordinates.x,
       initialCoordinates.y,
-      'all',
+      'players',
     );
+
+    /* TEST */
+    this.players[playerId].sprite.scaleX = 0.7;
+    this.players[playerId].sprite.scaleY = 0.7;
+    /* */
     this.physics.add.collider(this.players[playerId].sprite, layer);
     this.players[playerId].sprite.setCollideWorldBounds(true);
     this.physics.add.collider(
@@ -126,11 +131,13 @@ class GameScene extends Phaser.Scene {
     this.load.image('ground', '/assets/platform.png');
     this.load.image('star', '/assets/star.png');
     this.load.image('bomb', '/assets/bomb.png');
-    this.load.image('tiles', '/assets/tilemaps/tiles/main.png');
-    this.load.tilemapTiledJSON('map', '/assets/tilemaps/maps/main.json');
+    this.load.image('tiles1', '/assets/tilemaps/tilesets/Bokou_Steampunk_sols_murs.png');
+    this.load.image('tiles2', '/assets/tilemaps/tilesets/sols_murs.png');
+    this.load.image('tiles3', '/assets/tilemaps/tilesets/PandaMaru_MV_nobleinterior.png');
+    this.load.tilemapTiledJSON('map', '/assets/tilemaps/main.json');
 
     // Characters sprite sheet
-    this.load.spritesheet('all', '/assets/spritesheets/all.jpg', {
+    this.load.spritesheet('players', '/assets/spritesheets/playable_characters.png', {
       frameWidth: 48,
       frameHeight: 48,
     });
@@ -143,69 +150,83 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
+    //     // Load a blank map with a 32 x 32 px tile size. This is the base tile size. This means that
+    // // tiles in the map will be placed on a 32 x 32 px grid.
+    // var map = this.make.tilemap({ width: 200, height: 200, tileWidth: 32, tileHeight: 32 });
+    // // You can also change the base tile size of map like this:
+    // // map.setBaseTileSize(32, 32);
+    // // Load a 32 x 64 px tileset. This tileset was designed to allow tiles to overlap vertically, so
+    // // placing them on a 32 x 32 grid is exactly what we want.
+    // var tiles = map.addTilesetImage('walls_1x2', null, 32, 64);
+
     const map = this.make.tilemap({ key: 'map' });
 
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
     // of the tileset image used when loading the file in preload.
-    const tiles = map.addTilesetImage('main', 'tiles');
+    const tiles1 = map.addTilesetImage('Bokou_Steampunk_sols_murs', 'tiles1');
+    const tiles2 = map.addTilesetImage('sols_murs', 'tiles2');
+    const tiles3 = map.addTilesetImage('PandaMaru_MV_nobleinterior', 'tiles3');
 
     // You can load a layer from the map using the layer name from Tiled, or by using the layer
     // index (0 in this case).
-    const layer = map.createStaticLayer(0, tiles, 0, 0);
+    const layer1 = map.createStaticLayer('walls', tiles1, 0, 0);
+    const layer2 = map.createStaticLayer('ground', tiles2, 0, 0);
+    const layer3 = map.createStaticLayer('noble_fournitures', tiles3, 0, 0);
 
     // Configure the non walkable tiles
     // layer.setCollisionByProperty({ collides: true }); // doesnt work anymore
-    layer.setCollisionBetween(16, 52); // Disabled for testing purpose
+    // layer.setCollisionBetween(16, 52); // Disabled for testing purpose
 
     // Create the enemy
     this.enemy.sprite = this.physics.add.sprite(300, 500, 'enemy');
 
     // Create the players
-    Object.keys(this.players).forEach(id => this.addPlayer(this.players[id].id, this.players[id].position, layer));
+    Object.keys(this.players).forEach(id => this.addPlayer(this.players[id].id, this.players[id].position, layer1));
 
     this.enemy.sprite.setCollideWorldBounds(true);
 
-    this.physics.add.collider(this.enemy.sprite, layer);
+    // this.physics.add.collider(this.enemy.sprite, layer);
 
     // map size
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
     this.cameras.main.startFollow(this.players[this.currentPlayer.id].sprite);
+    this.cameras.main.zoom = 2;
 
     this.cameras.main.followOffset.set(0, 0);
 
     // Player animations
     this.anims.create({
       key: `player_${spriteDirection.left}`,
-      frames: this.anims.generateFrameNumbers('all', { start: 69, end: 71 }),
+      frames: this.anims.generateFrameNumbers('players', { start: 12, end: 14 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
       key: 'player_immobile',
-      frames: [{ key: 'all', frame: 58 }],
+      frames: [{ key: 'players', frame: 1 }],
       frameRate: 20,
     });
 
     this.anims.create({
       key: `player_${spriteDirection.right}`,
-      frames: this.anims.generateFrameNumbers('all', { start: 81, end: 83 }),
+      frames: this.anims.generateFrameNumbers('players', { start: 24, end: 26 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
       key: `player_${spriteDirection.up}`,
-      frames: this.anims.generateFrameNumbers('all', { start: 93, end: 95 }),
+      frames: this.anims.generateFrameNumbers('players', { start: 36, end: 38 }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
       key: `player_${spriteDirection.down}`,
-      frames: this.anims.generateFrameNumbers('all', { start: 57, end: 59 }),
+      frames: this.anims.generateFrameNumbers('players', { start: 0, end: 2 }),
       frameRate: 10,
       repeat: -1,
     });
@@ -296,6 +317,7 @@ class GameScene extends Phaser.Scene {
   }
 
   updatePlayerCoordinates({ playerId, coordinatesData }) {
+    console.log('updatePlayerCoordinates', { playerId, coordinatesData });
     this.players[playerId].sprite.x = coordinatesData.x;
     this.players[playerId].sprite.y = coordinatesData.y;
     this.players[playerId].nicknameSprite.x = coordinatesData.x - 50;
@@ -339,11 +361,11 @@ class GameScene extends Phaser.Scene {
     this.tweens.add({
       targets: this.enemy.sprite,
       props: {
-          x: { value: x },
-          y: { value: y },
+        x: { value: x },
+        y: { value: y },
       },
       duration: 200,
-  });
+    });
 
     this.enemy.sprite.anims.play(`enemy_${direction}`, true);
   }
@@ -356,7 +378,7 @@ class GameScene extends Phaser.Scene {
     }
 
     if (this.cursors.space.isDown) {
-      console.log("SPACE");
+      console.log('SPACE');
     }
 
     if (this.cursors.up.isDown) {
