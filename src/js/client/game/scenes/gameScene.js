@@ -134,6 +134,7 @@ class GameScene extends Phaser.Scene {
     this.load.image('tiles1', '/assets/tilemaps/tilesets/Bokou_Steampunk_sols_murs.png');
     this.load.image('tiles2', '/assets/tilemaps/tilesets/sols_murs.png');
     this.load.image('tiles3', '/assets/tilemaps/tilesets/PandaMaru_MV_nobleinterior.png');
+    this.load.image('tiles4', '/assets/tilemaps/tilesets/interior_normal.png');
     this.load.tilemapTiledJSON('map', '/assets/tilemaps/main.json');
 
     // Characters sprite sheet
@@ -166,12 +167,14 @@ class GameScene extends Phaser.Scene {
     const tiles1 = map.addTilesetImage('Bokou_Steampunk_sols_murs', 'tiles1');
     const tiles2 = map.addTilesetImage('sols_murs', 'tiles2');
     const tiles3 = map.addTilesetImage('PandaMaru_MV_nobleinterior', 'tiles3');
+    const tiles4 = map.addTilesetImage('interior_normal', 'tiles4');
 
     // You can load a layer from the map using the layer name from Tiled, or by using the layer
     // index (0 in this case).
     const layer1 = map.createStaticLayer('walls', tiles1, 0, 0);
     const layer2 = map.createStaticLayer('ground', tiles2, 0, 0);
     const layer3 = map.createStaticLayer('noble_fournitures', tiles3, 0, 0);
+    const layer4 = map.createStaticLayer('interior_normal', tiles4, 0, 0);
 
     // Configure the non walkable tiles
     // layer.setCollisionByProperty({ collides: true }); // doesnt work anymore
@@ -192,7 +195,7 @@ class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
     this.cameras.main.startFollow(this.players[this.currentPlayer.id].sprite);
-    this.cameras.main.zoom = 2;
+    this.cameras.main.zoom = 1.9;
 
     this.cameras.main.followOffset.set(0, 0);
 
